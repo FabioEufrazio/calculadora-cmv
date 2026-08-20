@@ -1200,13 +1200,7 @@
                     }
                 }
 
-                let dataFormatada = '';
-                if (f.data) {
-                    const dataBr = formatarDataParaExibicao(f.data);
-                    dataFormatada = ` <span style="font-size: 0.8rem; opacity: 0.7;">(${dataBr})</span>`;
-                }
-
-                return `${f.nome}: R$ ${f.preco.toFixed(2)} / ${f.qtd}${i.unidade}${dataFormatada} ${badgeHtml}`;
+                return `${f.nome}: R$ ${f.preco.toFixed(2)} / ${f.qtd}${i.unidade} ${badgeHtml}`;
             }).join('<br>');
 
             const maior = obterMaiorPrecoInsumo(i);

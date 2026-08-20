@@ -1451,7 +1451,7 @@
     }
 
     document.getElementById('btn-salvar-edicao-insumo').addEventListener('click', () => {
-        const id = document.getElementById('edit-insumo-id').value;
+        const id = Number(document.getElementById('edit-insumo-id').value);
         const nome = document.getElementById('edit-insumo-nome').value.trim();
         const unidade = document.getElementById('edit-insumo-unidade').value;
 
@@ -1481,6 +1481,8 @@
             renderDrinquesSalvos();
             fecharModalEditarInsumo();
             mostrarNotificacao('Insumo atualizado com sucesso!');
+        } else {
+            mostrarNotificacao('Erro ao encontrar o insumo. Tente novamente.', 'danger');
         }
     });
 

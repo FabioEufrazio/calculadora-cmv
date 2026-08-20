@@ -464,9 +464,8 @@
 
     <div class="tabs-nav">
         <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo')">Cadastrar Insumo</button>
-        <button class="tab-btn" onclick="openTab('tab-criar-drinque')">Criar Drinques</button>
         <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados')">Insumos Cadastrados</button>
-        <button class="tab-btn" onclick="openTab('tab-drinques-criados')">Drinques Criados</button>
+        <button class="tab-btn" onclick="openTab('tab-drinques')">Drinques</button>
     </div>
 
     <!-- ABA 1: CADASTRAR INSUMO -->
@@ -509,66 +508,7 @@
         </div>
     </div>
 
-    <!-- ABA 2: CRIAR DRINQUES -->
-    <div id="tab-criar-drinque" class="tab-content">
-        <div class="card">
-            <h2 id="drinque-form-title">Criar Drinque</h2>
-            <input type="hidden" id="drinque-id">
-            <div class="form-group">
-                <label for="drinque-nome">Nome do Drinque</label>
-                <input type="text" id="drinque-nome" placeholder="Ex: Gin Tônica Especial">
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group" style="grid-column: span 2;">
-                    <label for="select-insumo">Insumo</label>
-                    <select id="select-insumo"></select>
-                </div>
-                <div class="form-group">
-                    <label for="dose-qtd">Dose/Qtd Usada</label>
-                    <input type="number" step="0.01" id="dose-qtd" placeholder="Ex: 50">
-                </div>
-            </div>
-            <button type="button" id="btn-add-dose" style="margin-bottom: 20px;">Adicionar Insumo à Receita</button>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Insumo</th>
-                        <th>Dose</th>
-                        <th>Custo Max.</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody id="tb-receita"></tbody>
-            </table>
-
-            <div class="form-group" style="margin-top: 24px;">
-                <label for="markup">Markup (Multiplicador)</label>
-                <input type="number" step="0.1" id="markup" value="4.0">
-            </div>
-
-            <div class="summary-box">
-                <div class="summary-item">
-                    <label>Custo Max. (CMV R$)</label>
-                    <span class="value" id="res-cmv-rs">R$ 0,00</span>
-                </div>
-                <div class="summary-item">
-                    <label>Preço Sugerido</label>
-                    <span class="value" id="res-preco-venda">R$ 0,00</span>
-                </div>
-                <div class="summary-item">
-                    <label>CMV %</label>
-                    <span class="value" id="res-cmv-pct">0%</span>
-                </div>
-            </div>
-
-            <button type="button" id="btn-salvar-drinque" style="margin-top: 24px; width: 100%; font-size: 1.1rem;">💾 Salvar Drinque na Lista</button>
-            <button type="button" id="btn-cancelar-drinque-edicao" style="display:none; margin-top: 10px; width: 100%; background:#64748b; color:#fff;">Cancelar Edição do Drinque</button>
-        </div>
-    </div>
-
-    <!-- ABA 3: INSUMOS CADASTRADOS -->
+    <!-- ABA 2: INSUMOS CADASTRADOS -->
     <div id="tab-insumos-cadastrados" class="tab-content">
         <div class="card">
             <div class="card-header-actions">
@@ -599,49 +539,76 @@
         </div>
     </div>
 
-    <!-- ABA 4: DRINQUES CRIADOS -->
-    <div id="tab-drinques-criados" class="tab-content">
+    <!-- ABA 3: DRINQUES -->
+    <div id="tab-drinques" class="tab-content">
         <div class="card">
-            <h2>Drinques Salvos</h2>
+            <div class="card-header-actions">
+                <h2>Drinques Salvos</h2>
+                <button type="button" class="btn-success" onclick="abrirModalCriarDrinque()">🍹 Novo Drinque</button>
+            </div>
             <div id="lista-drinques-salvos"></div>
         </div>
     </div>
 
 </div>
 
-<!-- JANELA MODAL DE EDIÇÃO DE INSUMOS DOS DRINQUES -->
-<div class="modal-overlay" id="modal-editar-insumos">
-    <div class="modal-content">
-        <h3 class="modal-title" id="modal-drinque-nome">Editar Insumos</h3>
+<!-- JANELA MODAL DE CRIAÇÃO / EDIÇÃO DE DRINQUE -->
+<div class="modal-overlay" id="modal-criar-drinque">
+    <div class="modal-content" style="max-width: 750px; max-height: 90vh; overflow-y: auto;">
+        <h3 class="modal-title" id="drinque-form-title">Criar Drinque</h3>
+        <input type="hidden" id="drinque-id">
+        <div class="form-group">
+            <label for="drinque-nome">Nome do Drinque</label>
+            <input type="text" id="drinque-nome" placeholder="Ex: Gin Tônica Especial">
+        </div>
         
-        <div class="modal-add-box">
-            <label style="margin-bottom: 8px; display: block; font-weight: bold; color: var(--text-main);">Adicionar Novo Insumo:</label>
-            <div class="modal-add-row">
-                <div style="flex: 2;">
-                    <select id="modal-select-insumo" style="width: 100%;"></select>
-                </div>
-                <div style="flex: 1;">
-                    <input type="number" step="0.01" id="modal-dose-qtd" placeholder="Qtd" style="width: 100%;">
-                </div>
-                <button type="button" onclick="adicionarInsumoNaModal()" style="padding: 10px 14px;">+</button>
+        <div class="form-row">
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="select-insumo">Insumo</label>
+                <select id="select-insumo"></select>
+            </div>
+            <div class="form-group">
+                <label for="dose-qtd">Dose/Qtd Usada</label>
+                <input type="number" step="0.01" id="dose-qtd" placeholder="Ex: 50">
             </div>
         </div>
+        <button type="button" id="btn-add-dose" style="margin-bottom: 20px;">Adicionar Insumo à Receita</button>
 
         <table>
             <thead>
                 <tr>
                     <th>Insumo</th>
-                    <th>Qtde</th>
+                    <th>Dose</th>
                     <th>Custo Max.</th>
                     <th>Ação</th>
                 </tr>
             </thead>
-            <tbody id="tabela-modal-body"></tbody>
+            <tbody id="tb-receita"></tbody>
         </table>
 
-        <div class="modal-footer">
-            <button class="btn-cancelar" onclick="fecharModalInsumos()">Cancelar</button>
-            <button class="btn-salvar" onclick="salvarModalInsumos()">Salvar</button>
+        <div class="form-group" style="margin-top: 24px;">
+            <label for="markup">Markup (Multiplicador)</label>
+            <input type="number" step="0.1" id="markup" value="4.0">
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-item">
+                <label>Custo Max. (CMV R$)</label>
+                <span class="value" id="res-cmv-rs">R$ 0,00</span>
+            </div>
+            <div class="summary-item">
+                <label>Preço Sugerido</label>
+                <span class="value" id="res-preco-venda">R$ 0,00</span>
+            </div>
+            <div class="summary-item">
+                <label>CMV %</label>
+                <span class="value" id="res-cmv-pct">0%</span>
+            </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top: 24px;">
+            <button class="btn-cancelar" onclick="fecharModalCriarDrinque()">Cancelar</button>
+            <button class="btn-salvar" id="btn-salvar-drinque">💾 Salvar Drinque</button>
         </div>
     </div>
 </div>
@@ -1058,14 +1025,10 @@
         }
 
         salvarStorage();
-        resetFormDrinque();
+        fecharModalCriarDrinque();
         renderDrinquesSalvos();
         alert('Drinque salvo com sucesso!');
-        
-        document.querySelectorAll('.tab-btn')[3].click();
     });
-
-    btnCancelarDrinqueEdicao.addEventListener('click', resetFormDrinque);
 
     function resetFormDrinque() {
         drinqueId.value = '';
@@ -1073,7 +1036,6 @@
         receitaAtual = [];
         inputMarkup.value = '4.0';
         document.getElementById('drinque-form-title').innerText = "Criar Drinque";
-        btnCancelarDrinqueEdicao.style.display = "none";
         renderReceita();
     }
 
@@ -1120,7 +1082,7 @@
                 <div class="drink-header">
                     <span class="drink-title">${d.nome}</span>
                     <div>
-                        <button class="btn-edit" onclick="abrirModalInsumos(${d.id})">Editar</button>
+                        <button class="btn-edit" onclick="abrirModalEditarDrinque(${d.id})">Editar</button>
                         <button class="btn-danger" onclick="excluirDrinque(${d.id})">Excluir</button>
                     </div>
                 </div>
@@ -1141,110 +1103,30 @@
         });
     }
 
-    // JANELA MODAL
-    function abrirModalInsumos(id) {
-        drinqueModalId = id;
-        const drinque = drinques.find(d => d.id === id);
-        if (!drinque) return;
-
-        document.getElementById("modal-drinque-nome").innerText = `Editar Insumos - ${drinque.nome}`;
-        rascunhoReceitaModal = JSON.parse(JSON.stringify(drinque.receita));
-        
-        atualizarSelectInsumos();
-        renderTabelaModal();
-        document.getElementById("modal-editar-insumos").classList.add("active");
+    // JANELA MODAL DE CRIAÇÃO / EDIÇÃO DE DRINQUES
+    function abrirModalCriarDrinque() {
+        resetFormDrinque();
+        document.getElementById('drinque-form-title').innerText = "Criar Novo Drinque";
+        document.getElementById('modal-criar-drinque').classList.add('active');
     }
 
-    function fecharModalInsumos() {
-        document.getElementById("modal-editar-insumos").classList.remove("active");
-        drinqueModalId = null;
-        rascunhoReceitaModal = [];
+    function abrirModalEditarDrinque(id) {
+        const d = drinques.find(item => item.id === id);
+        if (!d) return;
+
+        drinqueId.value = d.id;
+        drinqueNome.value = d.nome;
+        inputMarkup.value = d.markup || 4.0;
+        receitaAtual = JSON.parse(JSON.stringify(d.receita));
+
+        document.getElementById('drinque-form-title').innerText = `Editar Drinque - ${d.nome}`;
+        renderReceita();
+        document.getElementById('modal-criar-drinque').classList.add('active');
     }
 
-    function adicionarInsumoNaModal() {
-        const selectModal = document.getElementById("modal-select-insumo");
-        const inputQtd = document.getElementById("modal-dose-qtd");
-        
-        const id = Number(selectModal.value);
-        const qtd = parseFloat(inputQtd.value);
-
-        if (!id || isNaN(qtd) || qtd <= 0) {
-            alert("Selecione um insumo e digite uma quantidade válida!");
-            return;
-        }
-
-        rascunhoReceitaModal.push({ insumoId: id, qtd: qtd });
-        inputQtd.value = '';
-        renderTabelaModal();
-    }
-
-    function renderTabelaModal() {
-        const tbody = document.getElementById("tabela-modal-body");
-        tbody.innerHTML = "";
-
-        ordenarListaReceita(rascunhoReceitaModal);
-
-        rascunhoReceitaModal.forEach((item, index) => {
-            const insumo = insumos.find(i => i.id === item.insumoId);
-            const nomeInsumo = insumo ? insumo.nome : "Insumo Removido";
-            const unidade = insumo ? insumo.unidade : "";
-            
-            let custoCalculado = 0;
-            if (insumo) {
-                const dadosPreco = obterMaiorPrecoInsumo(insumo);
-                custoCalculado = dadosPreco.custoUnit * item.qtd;
-            }
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>${nomeInsumo}</td>
-                    <td>
-                        <input 
-                            type="number" 
-                            class="input-qtde" 
-                            value="${item.qtd}" 
-                            min="0"
-                            step="any"
-                            oninput="atualizarQtdModal(${index}, this.value, this)"
-                        />
-                        <span style="color: var(--text-muted); font-size:0.85rem;">${unidade}</span>
-                    </td>
-                    <td id="modal-cost-${index}">R$ ${custoCalculado.toFixed(2)}</td>
-                    <td>
-                        <button class="btn-danger" onclick="removerItemModal(${index})">x</button>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    function atualizarQtdModal(index, novaQtd, inputEl) {
-        const qtdNum = parseFloat(novaQtd) || 0;
-        rascunhoReceitaModal[index].qtd = qtdNum;
-
-        const insumo = insumos.find(i => i.id === rascunhoReceitaModal[index].insumoId);
-        const cellCusto = document.getElementById(`modal-cost-${index}`);
-        if (insumo && cellCusto) {
-            const dadosPreco = obterMaiorPrecoInsumo(insumo);
-            const custoItem = dadosPreco.custoUnit * qtdNum;
-            cellCusto.innerText = `R$ ${custoItem.toFixed(2)}`;
-        }
-    }
-
-    function removerItemModal(index) {
-        rascunhoReceitaModal.splice(index, 1);
-        renderTabelaModal();
-    }
-
-    function salvarModalInsumos() {
-        const drinque = drinques.find(d => d.id === drinqueModalId);
-        if (drinque) {
-            ordenarListaReceita(rascunhoReceitaModal);
-            drinque.receita = JSON.parse(JSON.stringify(rascunhoReceitaModal));
-            salvarStorage();
-            renderDrinquesSalvos();
-        }
-        fecharModalInsumos();
+    function fecharModalCriarDrinque() {
+        document.getElementById('modal-criar-drinque').classList.remove('active');
+        resetFormDrinque();
     }
 
     function salvarStorage() {

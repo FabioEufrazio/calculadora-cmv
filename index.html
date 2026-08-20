@@ -1066,7 +1066,7 @@
                     const dadosPreco = obterMaiorPrecoInsumo(insumo);
                     const custoDose = dadosPreco.custoUnit * item.qtd;
                     cmvAtualizado += custoDose;
-                    linhasInsumos += `<li>${insumo.nome}: ${item.qtd} ${insumo.unidade} (R$ ${custoDose.toFixed(2)} - <em>${dadosPreco.nomeFornecedor}</em>)</li>`;
+                    linhasInsumos += `<li>${insumo.nome}: ${item.qtd} ${insumo.unidade} (R$ ${custoDose.toFixed(2)})</li>`;
                 } else {
                     linhasInsumos += `<li style="color:var(--danger)">Insumo removido (${item.qtd})</li>`;
                 }

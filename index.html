@@ -744,32 +744,63 @@
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "");
 
+        // 1. Destilados
         const spirits = ['cachaca', 'gin', 'vodka', 'rum', 'whisky', 'whiskey', 'bourbon', 'scotch', 'tequila', 'mezcal', 'brandy', 'cognac', 'pisco', 'aguardente', 'grappa', 'singani', 'calvados'];
         if (spirits.some(s => nome.includes(s))) return 1;
 
+        // 2. Modificadores e Licores
         const modificadores = ['licor', 'vermute', 'vermouth', 'bitter', 'aperitivo', 'campari', 'aperol', 'amaro', 'cointreau', 'triple sec', 'curacao', 'st germain', 'absinto', 'sherry', 'jerez', 'porto'];
         if (modificadores.some(m => nome.includes(m))) return 2;
 
-        const acidosFrutas = ['limao', 'laranja', 'maracuja', 'abacaxi', 'suco', 'polpa', 'morango', 'fruta', 'framboesa', 'amora', 'mirtilo', 'grapefruit', 'toranja'];
+        // 3. Frutas, Sucos e Ervas (inclui limão, hortelã, manjericão, etc.)
+        const acidosFrutas = ['limao', 'laranja', 'maracuja', 'abacaxi', 'suco', 'polpa', 'morango', 'fruta', 'framboesa', 'amora', 'mirtilo', 'grapefruit', 'toranja', 'hortela', 'manjericao', 'alecrim', 'mint', 'basil', 'rosemary', 'folha', 'especiaria', 'canela', 'cravo'];
         if (acidosFrutas.some(f => nome.includes(f))) return 3;
 
+        // 4. Adoçantes e Xaropes
         const adocantes = ['xarope', 'acucar', 'aucar', 'sugar', 'mel', 'agave', 'pure', 'melado', 'stevia', 'simple syrup'];
         if (adocantes.some(a => nome.includes(a))) return 4;
 
-        if (nome.includes('gelo')) return 5;
+        // 5. Bebidas com gás e Diluentes
+        const gasosas = ['agua', 'tonica', 'soda', 'refrigerante', 'refri', 'gas', 'ginger', 'cola', 'club soda', 'sprite', 'schweppes'];
+        if (gasosas.some(g => nome.includes(g))) return 5;
 
-        return 6;
+        // 6. Gelo
+        if (nome.includes('gelo') || nome.includes('ice')) return 6;
+
+        // 7. Outros
+        return 7;
     }
 
+    // Ordena um array de objetos insumos (com propriedade .nome)
+    function ordenarInsumos(lista) {
+        return lista.sort((a, b) => {
+            const pA = obterPrioridadeInsumo(a.nome);
+            const pB = obterPrioridadeInsumo(b.nome);
+
+            if (pA !== pB) {
+                return pA - pB;
+            }
+
+            return a.nome.localeCompare(b.nome, 'pt-BR');
+        });
+    }
+
+    // Ordena a lista de itens da receita (com propriedade .insumoId)
     function ordenarListaReceita(lista) {
         return lista.sort((a, b) => {
             const insumoA = insumos.find(i => i.id === a.insumoId);
             const insumoB = insumos.find(i => i.id === b.insumoId);
-            
+
             const pA = insumoA ? obterPrioridadeInsumo(insumoA.nome) : 99;
             const pB = insumoB ? obterPrioridadeInsumo(insumoB.nome) : 99;
 
-            return pA - pB;
+            if (pA !== pB) {
+                return pA - pB;
+            }
+
+            const nomeA = insumoA ? insumoA.nome : '';
+            const nomeB = insumoB ? insumoB.nome : '';
+            return nomeA.localeCompare(nomeB, 'pt-BR');
         });
     }
 
@@ -936,7 +967,7 @@
         }
 
         const termoBusca = document.getElementById('busca-insumo') ? document.getElementById('busca-insumo').value.toLowerCase().trim() : '';
-        const insumosFiltrados = insumos.filter(i => i.nome.toLowerCase().includes(termoBusca));
+        const insumosFiltrados = ordenarInsumos(insumos.filter(i => i.nome.toLowerCase().includes(termoBusca)));
 
         if (insumosFiltrados.length === 0) {
             tbInsumos.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhum insumo encontrado.</td></tr>';
@@ -1003,7 +1034,8 @@
         const modalSelect = document.getElementById('modal-select-insumo');
         if (modalSelect) modalSelect.innerHTML = '';
 
-        insumos.forEach(i => {
+        const insumosOrdenados = ordenarInsumos([...insumos]);
+        insumosOrdenados.forEach(i => {
             const opt = document.createElement('option');
             opt.value = i.id;
             opt.textContent = `${i.nome} (${i.unidade})`;

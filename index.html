@@ -6,19 +6,19 @@
     <title>Calculadora de CMV de Drinques</title>
     <style>
         :root {
-            --bg-dark: #f8fafc;       /* Slate 50 (Fundo principal claro, limpo) */
-            --card-bg: #ffffff;       /* Branco puro para painéis */
-            --input-bg: #ffffff;      /* Branco para inputs */
-            --accent: #0284c7;        /* Azul Oceano moderno */
-            --accent-hover: #0369a1;  /* Azul Oceano mais escuro */
-            --text-main: #0f172a;     /* Slate 900 (Texto principal escuro) */
-            --text-muted: #475569;    /* Slate 600 (Labels e textos secundários) */
-            --border: #e2e8f0;        /* Slate 200 (Bordas claras e discretas) */
-            --danger: #ef4444;        /* Vermelho vibrante */
-            --success: #10b981;       /* Verde esmeralda */
-            --info: #0ea5e9;          /* Azul céu */
-            --hover-bg: #f1f5f9;      /* Slate 100 para hover nas abas */
-            --th-bg: #f1f5f9;         /* Slate 100 para cabeçalhos da tabela */
+            --bg-dark: #0b0f19;       /* Fundo principal azul-escuro profundo */
+            --card-bg: #161e2e;       /* Fundo dos painéis em azul-marinho */
+            --input-bg: #0b0f19;      /* Fundo dos inputs em azul-escuro profundo */
+            --accent: #38bdf8;        /* Azul Celeste/Ciano claro vibrante */
+            --accent-hover: #7dd3fc;  /* Azul celeste mais claro */
+            --text-main: #ffffff;     /* Branco puro para textos principais */
+            --text-muted: #94a3b8;    /* Slate 400 para labels */
+            --border: #243048;        /* Azul-marinho cinzento para bordas */
+            --danger: #f87171;        /* Vermelho pastel */
+            --success: #34d399;       /* Verde pastel */
+            --info: #38bdf8;          /* Azul celeste */
+            --hover-bg: #1e293b;      /* Slate 800 para hover nas abas */
+            --th-bg: #0f172a;         /* Fundo do header em azul-escuro */
         }
 
         * {
@@ -152,12 +152,12 @@
 
         input:focus, select:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
         }
 
         button {
             background-color: var(--accent);
-            color: #ffffff;
+            color: #0b0f19;
             font-weight: 600;
             border: none;
             padding: 10px 18px;
@@ -165,7 +165,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             font-size: 0.95rem;
-            box-shadow: 0 1px 2px 0 rgba(99, 102, 241, 0.2);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
         }
 
         button:hover {
@@ -178,39 +178,39 @@
         }
 
         .btn-secondary {
-            background-color: #f1f5f9;
-            color: #475569;
-            border: 1px solid #cbd5e1;
+            background-color: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid #334155;
             padding: 6px 12px;
             font-size: 0.85rem;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
 
         .btn-secondary:hover {
-            background-color: #e2e8f0;
-            color: #1e293b;
-            border-color: #94a3b8;
+            background-color: #334155;
+            color: #ffffff;
+            border-color: #475569;
         }
 
         .btn-success {
-            background-color: #ecfdf5;
-            color: #047857;
-            border: 1px solid #a7f3d0;
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
             padding: 6px 12px;
             font-size: 0.85rem;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
         }
 
         .btn-success:hover {
-            background-color: #d1fae5;
-            color: #065f46;
-            border-color: #6ee7b7;
+            background-color: rgba(16, 185, 129, 0.25);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.5);
         }
 
         .btn-danger {
-            background-color: #fff1f2;
-            color: #b91c1c;
-            border: 1px solid #fecdd3;
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
             padding: 6px 10px;
             font-size: 0.8rem;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
@@ -218,15 +218,15 @@
         }
 
         .btn-danger:hover {
-            background-color: #ffe4e6;
-            color: #991b1b;
-            border-color: #fda4af;
+            background-color: rgba(239, 68, 68, 0.25);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.5);
         }
 
         .btn-edit {
-            background-color: #e0f2fe;
-            color: #0369a1;
-            border: 1px solid #bae6fd;
+            background-color: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
             padding: 6px 10px;
             font-size: 0.8rem;
             margin-right: 4px;
@@ -235,9 +235,9 @@
         }
 
         .btn-edit:hover {
-            background-color: #bae6fd;
-            color: #0c4a6e;
-            border-color: #7dd3fc;
+            background-color: rgba(56, 189, 248, 0.25);
+            color: #7dd3fc;
+            border-color: rgba(56, 189, 248, 0.5);
         }
 
         .actions-group {

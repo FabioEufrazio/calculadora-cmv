@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de CMV de Drinques</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;       /* Slate 900 (Fundo principal escuro) */
+            --card-bg: #1e293b;       /* Slate 800 (Fundo dos painéis) */
+            --input-bg: #0f172a;      /* Slate 900 para inputs */
+            --accent: #6366f1;        /* Indigo 500 (Cor primária vibrante) */
+            --accent-hover: #4f46e5;  /* Indigo 600 */
+            --text-main: #f8fafc;     /* Slate 50 (Texto principal claro) */
+            --text-muted: #94a3b8;    /* Slate 400 (Subtítulos e labels) */
+            --border: #334155;        /* Slate 700 (Bordas escuras discretas) */
+            --danger: #f87171;        /* Vermelho suave para tema escuro */
+            --success: #34d399;       /* Verde suave para tema escuro */
+            --info: #38bdf8;          /* Azul suave para tema escuro */
+            --hover-bg: #334155;      /* Slate 700 para hovers */
+            --th-bg: #0f172a;         /* Fundo do header da tabela */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tabs-nav {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .tab-btn {
+            background-color: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .card-header-actions h2 {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        h2 {
+            color: var(--text-main);
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 12px;
+            border-radius: 6px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        button {
+            background-color: var(--accent);
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            font-size: 0.95rem;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--info);
+            border: 1px solid var(--info);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--info);
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background-color: transparent;
+            color: var(--success);
+            border: 1px solid var(--success);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn-success:hover {
+            background-color: var(--success);
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: #ffffff;
+        }
+
+        .btn-edit {
+            background-color: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            margin-right: 4px;
+        }
+
+        .btn-edit:hover {
+            background-color: var(--accent);
+            color: #ffffff;
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            border-bottom: 1px solid var(--border);
+            padding: 12px 10px;
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            background-color: var(--th-bg);
+        }
+
+        .summary-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            background-color: var(--bg-dark);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-item .value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .drink-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .drink-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .drink-title {
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .drink-metrics {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .drink-metrics span strong {
+            color: var(--text-main);
+        }
+
+        .empty-msg {
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        .input-qtde {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 8px;
+            border-radius: 4px;
+            width: 75px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .modal-add-box {
+            background-color: var(--bg-dark);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+
+        .modal-add-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-salvar {
+            background-color: var(--success);
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-salvar:hover {
+            background-color: #059669;
+        }
+
+        .btn-cancelar {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancelar:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-main);
+        }
+
+        .supplier-box {
+            background-color: var(--bg-dark);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .supplier-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .tag-max {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 5px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .tag-min {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 5px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo')">Cadastrar Insumo</button>
+        <button class="tab-btn" onclick="openTab('tab-criar-drinque')">Criar Drinques</button>
+        <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados')">Insumos Cadastrados</button>
+        <button class="tab-btn" onclick="openTab('tab-drinques-criados')">Drinques Criados</button>
+    </div>
+
+    <!-- ABA 1: CADASTRAR INSUMO -->
+    <div id="tab-cadastrar-insumo" class="tab-content active">
+        <div class="card">
+            <h2 id="insumo-form-title">Cadastrar Novo Insumo</h2>
+            <form id="form-insumo">
+                <input type="hidden" id="insumo-id">
+                <div class="form-row">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="insumo-nome">Nome do Insumo</label>
+                        <input type="text" id="insumo-nome" placeholder="Ex: Gin, Xarope de Açúcar, Limão" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="insumo-unidade">Unidade Padronizada</label>
+                        <select id="insumo-unidade">
+                            <option value="ml">ml</option>
+                            <option value="g">g</option>
+                            <option value="Kg">Kg</option>
+                            <option value="un">unidade</option>
+                            <option value="Dash">Dash</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO DINÂMICA DE FORNECEDORES -->
+                <div class="supplier-box">
+                    <label style="font-weight: bold; color: var(--text-main); margin-bottom: 12px; display: block;">
+                        Fornecedores e Preços
+                    </label>
+                    <div id="container-fornecedores">
+                        <!-- Linhas de fornecedores entram via JS -->
+                    </div>
+                    <button type="button" class="btn-secondary" id="btn-add-fornecedor" style="margin-top: 5px;">+ Adicionar Fornecedor</button>
+                </div>
+
+                <button type="submit" id="btn-salvar-insumo">Salvar Insumo</button>
+                <button type="button" id="btn-cancelar-edicao" style="display:none; background:#64748b; color:#fff;">Cancelar Edição</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ABA 2: CRIAR DRINQUES -->
+    <div id="tab-criar-drinque" class="tab-content">
+        <div class="card">
+            <h2 id="drinque-form-title">Criar Drinque</h2>
+            <input type="hidden" id="drinque-id">
+            <div class="form-group">
+                <label for="drinque-nome">Nome do Drinque</label>
+                <input type="text" id="drinque-nome" placeholder="Ex: Gin Tônica Especial">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label for="select-insumo">Insumo</label>
+                    <select id="select-insumo"></select>
+                </div>
+                <div class="form-group">
+                    <label for="dose-qtd">Dose/Qtd Usada</label>
+                    <input type="number" step="0.01" id="dose-qtd" placeholder="Ex: 50">
+                </div>
+            </div>
+            <button type="button" id="btn-add-dose" style="margin-bottom: 20px;">Adicionar Insumo à Receita</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Insumo</th>
+                        <th>Dose</th>
+                        <th>Custo Max.</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="tb-receita"></tbody>
+            </table>
+
+            <div class="form-group" style="margin-top: 24px;">
+                <label for="markup">Markup (Multiplicador)</label>
+                <input type="number" step="0.1" id="markup" value="4.0">
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-item">
+                    <label>Custo Max. (CMV R$)</label>
+                    <span class="value" id="res-cmv-rs">R$ 0,00</span>
+                </div>
+                <div class="summary-item">
+                    <label>Preço Sugerido</label>
+                    <span class="value" id="res-preco-venda">R$ 0,00</span>
+                </div>
+                <div class="summary-item">
+                    <label>CMV %</label>
+                    <span class="value" id="res-cmv-pct">0%</span>
+                </div>
+            </div>
+
+            <button type="button" id="btn-salvar-drinque" style="margin-top: 24px; width: 100%; font-size: 1.1rem;">💾 Salvar Drinque na Lista</button>
+            <button type="button" id="btn-cancelar-drinque-edicao" style="display:none; margin-top: 10px; width: 100%; background:#64748b; color:#fff;">Cancelar Edição do Drinque</button>
+        </div>
+    </div>
+
+    <!-- ABA 3: INSUMOS CADASTRADOS -->
+    <div id="tab-insumos-cadastrados" class="tab-content">
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>Insumos Cadastrados</h2>
+                <div class="actions-group">
+                    <button type="button" class="btn-secondary" id="btn-exportar">📥 Exportar Backup</button>
+                    <button type="button" class="btn-success" onclick="document.getElementById('file-importar').click()">📤 Importar Backup</button>
+                    <input type="file" id="file-importar" accept=".json" style="display: none;">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <input type="text" id="busca-insumo" placeholder="🔍 Buscar insumo pelo nome..." oninput="renderInsumos()" style="width: 100%; max-width: 320px;">
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Fornecedores Cadastrados</th>
+                        <th>Maior Preço (Base CMV)</th>
+                        <th>Custo Unit. Máximo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tb-insumos"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ABA 4: DRINQUES CRIADOS -->
+    <div id="tab-drinques-criados" class="tab-content">
+        <div class="card">
+            <h2>Drinques Salvos</h2>
+            <div id="lista-drinques-salvos"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- JANELA MODAL DE EDIÇÃO DE INSUMOS DOS DRINQUES -->
+<div class="modal-overlay" id="modal-editar-insumos">
+    <div class="modal-content">
+        <h3 class="modal-title" id="modal-drinque-nome">Editar Insumos</h3>
+        
+        <div class="modal-add-box">
+            <label style="margin-bottom: 8px; display: block; font-weight: bold; color: var(--text-main);">Adicionar Novo Insumo:</label>
+            <div class="modal-add-row">
+                <div style="flex: 2;">
+                    <select id="modal-select-insumo" style="width: 100%;"></select>
+                </div>
+                <div style="flex: 1;">
+                    <input type="number" step="0.01" id="modal-dose-qtd" placeholder="Qtd" style="width: 100%;">
+                </div>
+                <button type="button" onclick="adicionarInsumoNaModal()" style="padding: 10px 14px;">+</button>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Insumo</th>
+                    <th>Qtde</th>
+                    <th>Custo Max.</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-modal-body"></tbody>
+        </table>
+
+        <div class="modal-footer">
+            <button class="btn-cancelar" onclick="fecharModalInsumos()">Cancelar</button>
+            <button class="btn-salvar" onclick="salvarModalInsumos()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let insumos = JSON.parse(localStorage.getItem('insumos_db')) || [];
+    let drinques = JSON.parse(localStorage.getItem('drinques_db')) || [];
+    let receitaAtual = [];
+
+    let drinqueModalId = null;
+    let rascunhoReceitaModal = [];
+
+    // HELPER: OBTÉM DADOS DO MAIOR PREÇO DE UM INSUMO
+    function obterMaiorPrecoInsumo(insumo) {
+        if (!insumo || !insumo.fornecedores || insumo.fornecedores.length === 0) {
+            return { preco: 0, qtd: 1, custoUnit: 0, nomeFornecedor: 'Nenhum' };
+        }
+
+        let maior = insumo.fornecedores[0];
+        let maiorCustoUnit = (maior.preco || 0) / (maior.qtd || 1);
+
+        insumo.fornecedores.forEach(f => {
+            const custoUnit = (f.preco || 0) / (f.qtd || 1);
+            if (custoUnit > maiorCustoUnit) {
+                maiorCustoUnit = custoUnit;
+                maior = f;
+            }
+        });
+
+        return {
+            preco: maior.preco,
+            qtd: maior.qtd,
+            custoUnit: maiorCustoUnit,
+            nomeFornecedor: maior.nome
+        };
+    }
+
+    function obterPrioridadeInsumo(nomeInsumo) {
+        const nome = (nomeInsumo || '')
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+
+        const spirits = ['cachaca', 'gin', 'vodka', 'rum', 'whisky', 'whiskey', 'bourbon', 'scotch', 'tequila', 'mezcal', 'brandy', 'cognac', 'pisco', 'aguardente', 'grappa', 'singani', 'calvados'];
+        if (spirits.some(s => nome.includes(s))) return 1;
+
+        const modificadores = ['licor', 'vermute', 'vermouth', 'bitter', 'aperitivo', 'campari', 'aperol', 'amaro', 'cointreau', 'triple sec', 'curacao', 'st germain', 'absinto', 'sherry', 'jerez', 'porto'];
+        if (modificadores.some(m => nome.includes(m))) return 2;
+
+        const acidosFrutas = ['limao', 'laranja', 'maracuja', 'abacaxi', 'suco', 'polpa', 'morango', 'fruta', 'framboesa', 'amora', 'mirtilo', 'grapefruit', 'toranja'];
+        if (acidosFrutas.some(f => nome.includes(f))) return 3;
+
+        const adocantes = ['xarope', 'acucar', 'aucar', 'sugar', 'mel', 'agave', 'pure', 'melado', 'stevia', 'simple syrup'];
+        if (adocantes.some(a => nome.includes(a))) return 4;
+
+        if (nome.includes('gelo')) return 5;
+
+        return 6;
+    }
+
+    function ordenarListaReceita(lista) {
+        return lista.sort((a, b) => {
+            const insumoA = insumos.find(i => i.id === a.insumoId);
+            const insumoB = insumos.find(i => i.id === b.insumoId);
+            
+            const pA = insumoA ? obterPrioridadeInsumo(insumoA.nome) : 99;
+            const pB = insumoB ? obterPrioridadeInsumo(insumoB.nome) : 99;
+
+            return pA - pB;
+        });
+    }
+
+    function openTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+        document.getElementById(tabId).classList.add('active');
+        if(event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+    }
+
+    // ELEMENTOS DOM
+    const formInsumo = document.getElementById('form-insumo');
+    const insumoId = document.getElementById('insumo-id');
+    const insumoNome = document.getElementById('insumo-nome');
+    const insumoUnidade = document.getElementById('insumo-unidade');
+    const containerFornecedores = document.getElementById('container-fornecedores');
+    const btnAddFornecedor = document.getElementById('btn-add-fornecedor');
+    const btnCancelarEdicao = document.getElementById('btn-cancelar-edicao');
+    
+    const drinqueId = document.getElementById('drinque-id');
+    const drinqueNome = document.getElementById('drinque-nome');
+    const selectInsumo = document.getElementById('select-insumo');
+    const doseQtd = document.getElementById('dose-qtd');
+    const btnAddDose = document.getElementById('btn-add-dose');
+    const tbReceita = document.getElementById('tb-receita');
+    const tbInsumos = document.getElementById('tb-insumos');
+    const inputMarkup = document.getElementById('markup');
+    const btnSalvarDrinque = document.getElementById('btn-salvar-drinque');
+    const btnCancelarDrinqueEdicao = document.getElementById('btn-cancelar-drinque-edicao');
+    const listaDrinquesSalvos = document.getElementById('lista-drinques-salvos');
+
+    const btnExportar = document.getElementById('btn-exportar');
+    const fileImportar = document.getElementById('file-importar');
+
+    function init() {
+        resetFormInsumo();
+        renderInsumos();
+        atualizarSelectInsumos();
+        renderDrinquesSalvos();
+        calcularTotais();
+    }
+
+    // LOGICA DOS CAMPOS DINÂMICOS DE FORNECEDORES
+    btnAddFornecedor.addEventListener('click', () => adicionarLinhaFornecedor());
+
+    function adicionarLinhaFornecedor(nome = '', qtd = '', preco = '', data = '') {
+        const div = document.createElement('div');
+        div.className = 'supplier-row';
+        const dataPadrao = data || new Date().toISOString().split('T')[0];
+        div.innerHTML = `
+            <input type="text" placeholder="Fornecedor (Ex: Mercado A)" class="f-nome" value="${nome}" required style="flex:2;">
+            <input type="number" step="0.01" placeholder="Qtd Emb." class="f-qtd" value="${qtd}" required style="flex:1;">
+            <input type="number" step="0.01" placeholder="Preço (R$)" class="f-preco" value="${preco}" required style="flex:1;">
+            <input type="date" class="f-data" value="${dataPadrao}" required style="flex:1.5;">
+            <button type="button" class="btn-danger" onclick="removerLinhaFornecedor(this)">X</button>
+        `;
+        containerFornecedores.appendChild(div);
+    }
+
+    function removerLinhaFornecedor(btn) {
+        if (containerFornecedores.children.length > 1) {
+            btn.parentElement.remove();
+        } else {
+            alert("É necessário manter pelo menos um fornecedor cadastrado!");
+        }
+    }
+
+    // SALVAR INSUMO
+    formInsumo.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = insumoId.value;
+        
+        const linhasFornecedores = containerFornecedores.querySelectorAll('.supplier-row');
+        const listaFornecedores = [];
+
+        linhasFornecedores.forEach(row => {
+            const fNome = row.querySelector('.f-nome').value.trim();
+            const fQtd = parseFloat(row.querySelector('.f-qtd').value);
+            const fPreco = parseFloat(row.querySelector('.f-preco').value);
+            const fData = row.querySelector('.f-data').value;
+
+            if (fNome && !isNaN(fQtd) && !isNaN(fPreco)) {
+                listaFornecedores.push({ nome: fNome, qtd: fQtd, preco: fPreco, data: fData });
+            }
+        });
+
+        if (listaFornecedores.length === 0) {
+            alert('Adicione pelo menos um fornecedor válido!');
+            return;
+        }
+
+        const dados = {
+            id: id ? Number(id) : Date.now(),
+            nome: insumoNome.value,
+            unidade: insumoUnidade.value,
+            fornecedores: listaFornecedores
+        };
+
+        if (id) {
+            insumos = insumos.map(i => i.id === dados.id ? dados : i);
+        } else {
+            insumos.push(dados);
+        }
+
+        salvarStorage();
+        resetFormInsumo();
+        renderInsumos();
+        atualizarSelectInsumos();
+        recalcularReceita();
+        renderDrinquesSalvos();
+    });
+
+    function editarInsumo(id) {
+        const item = insumos.find(i => i.id === id);
+        if (!item) return;
+
+        insumoId.value = item.id;
+        insumoNome.value = item.nome;
+        insumoUnidade.value = item.unidade;
+
+        containerFornecedores.innerHTML = '';
+        if (item.fornecedores && item.fornecedores.length > 0) {
+            item.fornecedores.forEach(f => adicionarLinhaFornecedor(f.nome, f.qtd, f.preco, f.data));
+        } else if (item.preco) {
+            adicionarLinhaFornecedor('Padrão', item.qtd, item.preco, item.dataAtualizacao || '');
+        } else {
+            adicionarLinhaFornecedor();
+        }
+
+        document.getElementById('insumo-form-title').innerText = "Editar Insumo";
+        btnCancelarEdicao.style.display = "inline-block";
+        
+        document.querySelectorAll('.tab-btn')[0].click();
+    }
+
+    btnCancelarEdicao.addEventListener('click', resetFormInsumo);
+
+    function resetFormInsumo() {
+        insumoId.value = '';
+        formInsumo.reset();
+        containerFornecedores.innerHTML = '';
+        adicionarLinhaFornecedor();
+        document.getElementById('insumo-form-title').innerText = "Cadastrar Novo Insumo";
+        btnCancelarEdicao.style.display = "none";
+    }
+
+    function excluirInsumo(id) {
+        if (!confirm("Excluir este insumo? Ele será removido das receitas.")) return;
+        insumos = insumos.filter(i => i.id !== id);
+        salvarStorage();
+        renderInsumos();
+        atualizarSelectInsumos();
+        receitaAtual = receitaAtual.filter(r => r.insumoId !== id);
+        renderReceita();
+        renderDrinquesSalvos();
+    }
+
+    function renderInsumos() {
+        tbInsumos.innerHTML = '';
+        if (insumos.length === 0) {
+            tbInsumos.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhum insumo cadastrado ainda.</td></tr>';
+            return;
+        }
+
+        const termoBusca = document.getElementById('busca-insumo') ? document.getElementById('busca-insumo').value.toLowerCase().trim() : '';
+        const insumosFiltrados = insumos.filter(i => i.nome.toLowerCase().includes(termoBusca));
+
+        if (insumosFiltrados.length === 0) {
+            tbInsumos.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhum insumo encontrado.</td></tr>';
+            return;
+        }
+
+        insumosFiltrados.forEach(i => {
+            if (!i.fornecedores) {
+                i.fornecedores = [{ nome: 'Padrão', qtd: i.qtd || 1, preco: i.preco || 0 }];
+            }
+
+            const total = i.fornecedores.length;
+            let maxCustoUnit = null;
+            let minCustoUnit = null;
+
+            if (total > 1) {
+                const custosUnitarios = i.fornecedores.map(f => (f.preco || 0) / (f.qtd || 1));
+                maxCustoUnit = Math.max(...custosUnitarios);
+                minCustoUnit = Math.min(...custosUnitarios);
+            }
+
+            const listaF = i.fornecedores.map(f => {
+                const custoUnit = (f.preco || 0) / (f.qtd || 1);
+                let badgeHtml = '';
+
+                if (total > 1) {
+                    if (custoUnit === maxCustoUnit) {
+                        badgeHtml = '<span class="tag-max">MAIOR</span>';
+                    } else if (custoUnit === minCustoUnit) {
+                        badgeHtml = '<span class="tag-min">MENOR</span>';
+                    }
+                }
+
+                let dataFormatada = '';
+                if (f.data) {
+                    const partes = f.data.split('-');
+                    if (partes.length === 3) {
+                        dataFormatada = ` <span style="font-size: 0.8rem; opacity: 0.7;">(${partes[2]}/${partes[1]}/${partes[0]})</span>`;
+                    }
+                }
+
+                return `${f.nome}: R$ ${f.preco.toFixed(2)} / ${f.qtd}${i.unidade}${dataFormatada} ${badgeHtml}`;
+            }).join('<br>');
+
+            const maior = obterMaiorPrecoInsumo(i);
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${i.nome}</strong></td>
+                <td style="font-size: 0.85rem; color: var(--text-muted);">${listaF}</td>
+                <td>R$ ${maior.preco.toFixed(2)} (${maior.nomeFornecedor})</td>
+                <td>R$ ${maior.custoUnit.toFixed(4)} / ${i.unidade}</td>
+                <td>
+                    <button class="btn-edit" onclick="editarInsumo(${i.id})">Editar</button>
+                    <button class="btn-danger" onclick="excluirInsumo(${i.id})">Excluir</button>
+                </td>
+            `;
+            tbInsumos.appendChild(tr);
+        });
+    }
+
+    function atualizarSelectInsumos() {
+        selectInsumo.innerHTML = '';
+        const modalSelect = document.getElementById('modal-select-insumo');
+        if (modalSelect) modalSelect.innerHTML = '';
+
+        insumos.forEach(i => {
+            const opt = document.createElement('option');
+            opt.value = i.id;
+            opt.textContent = `${i.nome} (${i.unidade})`;
+            selectInsumo.appendChild(opt);
+
+            if (modalSelect) {
+                const optModal = opt.cloneNode(true);
+                modalSelect.appendChild(optModal);
+            }
+        });
+    }
+
+    // MONTAR DRINQUES
+    btnAddDose.addEventListener('click', () => {
+        const id = Number(selectInsumo.value);
+        const qtd = parseFloat(doseQtd.value);
+        if (!id || !qtd) {
+            alert("Selecione um insumo e digite a quantidade!");
+            return;
+        }
+
+        receitaAtual.push({ insumoId: id, qtd: qtd });
+        doseQtd.value = '';
+        renderReceita();
+    });
+
+    function removerDose(index) {
+        receitaAtual.splice(index, 1);
+        renderReceita();
+    }
+
+    function recalcularReceita() {
+        renderReceita();
+    }
+
+    function renderReceita() {
+        tbReceita.innerHTML = '';
+        ordenarListaReceita(receitaAtual);
+
+        receitaAtual.forEach((item, index) => {
+            const insumo = insumos.find(i => i.id === item.insumoId);
+            if (!insumo) return;
+
+            const dadosPreco = obterMaiorPrecoInsumo(insumo);
+            const custoDose = dadosPreco.custoUnit * item.qtd;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${insumo.nome}</td>
+                <td>${item.qtd} ${insumo.unidade}</td>
+                <td>R$ ${custoDose.toFixed(2)}</td>
+                <td><button class="btn-danger" onclick="removerDose(${index})">X</button></td>
+            `;
+            tbReceita.appendChild(tr);
+        });
+        calcularTotais();
+    }
+
+    inputMarkup.addEventListener('input', calcularTotais);
+
+    function calcularTotais() {
+        let cmvTotal = 0;
+        receitaAtual.forEach(item => {
+            const insumo = insumos.find(i => i.id === item.insumoId);
+            if (insumo) {
+                const dadosPreco = obterMaiorPrecoInsumo(insumo);
+                cmvTotal += dadosPreco.custoUnit * item.qtd;
+            }
+        });
+
+        const markup = parseFloat(inputMarkup.value) || 0;
+        const precoVenda = cmvTotal * markup;
+        const cmvPct = precoVenda > 0 ? (cmvTotal / precoVenda) * 100 : 0;
+
+        document.getElementById('res-cmv-rs').innerText = `R$ ${cmvTotal.toFixed(2)}`;
+        document.getElementById('res-preco-venda').innerText = `R$ ${precoVenda.toFixed(2)}`;
+        document.getElementById('res-cmv-pct').innerText = `${cmvPct.toFixed(1)}%`;
+
+        return { cmvTotal, precoVenda, cmvPct, markup };
+    }
+
+    btnSalvarDrinque.addEventListener('click', () => {
+        const nome = drinqueNome.value.trim();
+        if (!nome) {
+            alert('Informe o nome do drinque!');
+            return;
+        }
+        if (receitaAtual.length === 0) {
+            alert('Adicione pelo menos um insumo ao drinque!');
+            return;
+        }
+
+        const id = drinqueId.value ? Number(drinqueId.value) : Date.now();
+        const totais = calcularTotais();
+
+        ordenarListaReceita(receitaAtual);
+
+        const novoDrinque = {
+            id: id,
+            nome: nome,
+            receita: [...receitaAtual],
+            markup: totais.markup
+        };
+
+        if (drinqueId.value) {
+            drinques = drinques.map(d => d.id === id ? novoDrinque : d);
+        } else {
+            drinques.push(novoDrinque);
+        }
+
+        salvarStorage();
+        resetFormDrinque();
+        renderDrinquesSalvos();
+        alert('Drinque salvo com sucesso!');
+        
+        document.querySelectorAll('.tab-btn')[3].click();
+    });
+
+    btnCancelarDrinqueEdicao.addEventListener('click', resetFormDrinque);
+
+    function resetFormDrinque() {
+        drinqueId.value = '';
+        drinqueNome.value = '';
+        receitaAtual = [];
+        inputMarkup.value = '4.0';
+        document.getElementById('drinque-form-title').innerText = "Criar Drinque";
+        btnCancelarDrinqueEdicao.style.display = "none";
+        renderReceita();
+    }
+
+    function excluirDrinque(id) {
+        if (!confirm("Tem certeza que deseja excluir este drinque?")) return;
+        drinques = drinques.filter(d => d.id !== id);
+        salvarStorage();
+        renderDrinquesSalvos();
+    }
+
+    function renderDrinquesSalvos() {
+        listaDrinquesSalvos.innerHTML = '';
+
+        if (drinques.length === 0) {
+            listaDrinquesSalvos.innerHTML = '<div class="empty-msg">Nenhum drinque salvo até o momento.</div>';
+            return;
+        }
+
+        drinques.forEach(d => {
+            let cmvAtualizado = 0;
+            let linhasInsumos = '';
+
+            ordenarListaReceita(d.receita);
+
+            d.receita.forEach(item => {
+                const insumo = insumos.find(i => i.id === item.insumoId);
+                if (insumo) {
+                    const dadosPreco = obterMaiorPrecoInsumo(insumo);
+                    const custoDose = dadosPreco.custoUnit * item.qtd;
+                    cmvAtualizado += custoDose;
+                    linhasInsumos += `<li>${insumo.nome}: ${item.qtd} ${insumo.unidade} (R$ ${custoDose.toFixed(2)} - <em>${dadosPreco.nomeFornecedor}</em>)</li>`;
+                } else {
+                    linhasInsumos += `<li style="color:var(--danger)">Insumo removido (${item.qtd})</li>`;
+                }
+            });
+
+            const markup = d.markup || 4.0;
+            const precoVendaAtualizado = cmvAtualizado * markup;
+            const cmvPctAtualizado = precoVendaAtualizado > 0 ? (cmvAtualizado / precoVendaAtualizado) * 100 : 0;
+
+            const div = document.createElement('div');
+            div.className = 'drink-card';
+            div.innerHTML = `
+                <div class="drink-header">
+                    <span class="drink-title">${d.nome}</span>
+                    <div>
+                        <button class="btn-edit" onclick="abrirModalInsumos(${d.id})">Editar</button>
+                        <button class="btn-danger" onclick="excluirDrinque(${d.id})">Excluir</button>
+                    </div>
+                </div>
+                <div class="drink-metrics">
+                    <span>CMV Máximo: <strong>R$ ${cmvAtualizado.toFixed(2)}</strong></span>
+                    <span>Markup: <strong>${markup}x</strong></span>
+                    <span>Preço Sugerido: <strong>R$ ${precoVendaAtualizado.toFixed(2)}</strong></span>
+                    <span>CMV %: <strong>${cmvPctAtualizado.toFixed(1)}%</strong></span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                    <strong>Insumos & Doses (Base Preço Teto):</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        ${linhasInsumos}
+                    </ul>
+                </div>
+            `;
+            listaDrinquesSalvos.appendChild(div);
+        });
+    }
+
+    // JANELA MODAL
+    function abrirModalInsumos(id) {
+        drinqueModalId = id;
+        const drinque = drinques.find(d => d.id === id);
+        if (!drinque) return;
+
+        document.getElementById("modal-drinque-nome").innerText = `Editar Insumos - ${drinque.nome}`;
+        rascunhoReceitaModal = JSON.parse(JSON.stringify(drinque.receita));
+        
+        atualizarSelectInsumos();
+        renderTabelaModal();
+        document.getElementById("modal-editar-insumos").classList.add("active");
+    }
+
+    function fecharModalInsumos() {
+        document.getElementById("modal-editar-insumos").classList.remove("active");
+        drinqueModalId = null;
+        rascunhoReceitaModal = [];
+    }
+
+    function adicionarInsumoNaModal() {
+        const selectModal = document.getElementById("modal-select-insumo");
+        const inputQtd = document.getElementById("modal-dose-qtd");
+        
+        const id = Number(selectModal.value);
+        const qtd = parseFloat(inputQtd.value);
+
+        if (!id || isNaN(qtd) || qtd <= 0) {
+            alert("Selecione um insumo e digite uma quantidade válida!");
+            return;
+        }
+
+        rascunhoReceitaModal.push({ insumoId: id, qtd: qtd });
+        inputQtd.value = '';
+        renderTabelaModal();
+    }
+
+    function renderTabelaModal() {
+        const tbody = document.getElementById("tabela-modal-body");
+        tbody.innerHTML = "";
+
+        ordenarListaReceita(rascunhoReceitaModal);
+
+        rascunhoReceitaModal.forEach((item, index) => {
+            const insumo = insumos.find(i => i.id === item.insumoId);
+            const nomeInsumo = insumo ? insumo.nome : "Insumo Removido";
+            const unidade = insumo ? insumo.unidade : "";
+            
+            let custoCalculado = 0;
+            if (insumo) {
+                const dadosPreco = obterMaiorPrecoInsumo(insumo);
+                custoCalculado = dadosPreco.custoUnit * item.qtd;
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${nomeInsumo}</td>
+                    <td>
+                        <input 
+                            type="number" 
+                            class="input-qtde" 
+                            value="${item.qtd}" 
+                            min="0"
+                            step="any"
+                            oninput="atualizarQtdModal(${index}, this.value, this)"
+                        />
+                        <span style="color: var(--text-muted); font-size:0.85rem;">${unidade}</span>
+                    </td>
+                    <td id="modal-cost-${index}">R$ ${custoCalculado.toFixed(2)}</td>
+                    <td>
+                        <button class="btn-danger" onclick="removerItemModal(${index})">x</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function atualizarQtdModal(index, novaQtd, inputEl) {
+        const qtdNum = parseFloat(novaQtd) || 0;
+        rascunhoReceitaModal[index].qtd = qtdNum;
+
+        const insumo = insumos.find(i => i.id === rascunhoReceitaModal[index].insumoId);
+        const cellCusto = document.getElementById(`modal-cost-${index}`);
+        if (insumo && cellCusto) {
+            const dadosPreco = obterMaiorPrecoInsumo(insumo);
+            const custoItem = dadosPreco.custoUnit * qtdNum;
+            cellCusto.innerText = `R$ ${custoItem.toFixed(2)}`;
+        }
+    }
+
+    function removerItemModal(index) {
+        rascunhoReceitaModal.splice(index, 1);
+        renderTabelaModal();
+    }
+
+    function salvarModalInsumos() {
+        const drinque = drinques.find(d => d.id === drinqueModalId);
+        if (drinque) {
+            ordenarListaReceita(rascunhoReceitaModal);
+            drinque.receita = JSON.parse(JSON.stringify(rascunhoReceitaModal));
+            salvarStorage();
+            renderDrinquesSalvos();
+        }
+        fecharModalInsumos();
+    }
+
+    function salvarStorage() {
+        localStorage.setItem('insumos_db', JSON.stringify(insumos));
+        localStorage.setItem('drinques_db', JSON.stringify(drinques));
+    }
+
+    btnExportar.addEventListener('click', () => {
+        if (insumos.length === 0 && drinques.length === 0) {
+            alert('Nenhum dado cadastrado para exportar!');
+            return;
+        }
+        const backupData = { insumos: insumos, drinques: drinques };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `backup_cmv_drinques_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    });
+
+    fileImportar.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const dadosImportados = JSON.parse(event.target.result);
+                if (dadosImportados.insumos || dadosImportados.drinques) {
+                    insumos = dadosImportados.insumos || [];
+                    drinques = dadosImportados.drinques || [];
+                }
+                salvarStorage();
+                renderInsumos();
+                atualizarSelectInsumos();
+                recalcularReceita();
+                renderDrinquesSalvos();
+                alert('Backup importado com sucesso!');
+            } catch (err) {
+                alert('Erro ao ler o arquivo de backup.');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    init();
+</script>
+
+</body>
+</html>

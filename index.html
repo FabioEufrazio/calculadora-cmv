@@ -469,19 +469,34 @@
             border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
+        .mobile-only-label {
+            display: none;
+        }
+
+        .supplier-row .f-group {
+            display: contents;
+        }
+
         /* ESTILOS DE RESPONSIVIDADE (MOBILE / ANDROID / IOS) */
         @media (max-width: 768px) {
             body {
-                padding-bottom: 80px;
+                padding: 0 0 80px 0;
             }
 
             .container {
-                padding: 10px;
+                padding: 0;
+                gap: 0;
+                width: 100%;
+                max-width: 100%;
             }
 
             .card {
-                padding: 16px;
-                border-radius: 12px;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+                padding: 24px 16px;
+                min-height: calc(100vh - 65px);
+                margin: 0;
             }
 
             /* 1. Barra de Navegação no Rodapé (Estilo App Nativo) */
@@ -497,7 +512,8 @@
                 padding: 8px 0;
                 margin-bottom: 0;
                 z-index: 1000;
-                box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+                height: 65px;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
             }
 
             .tab-btn {
@@ -505,25 +521,31 @@
                 border: none;
                 background: none;
                 color: var(--text-muted);
-                font-size: 0.75rem;
-                padding: 6px 0;
+                font-size: 0.7rem;
+                padding: 4px 0;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                gap: 4px;
+                gap: 2px;
                 border-radius: 0;
                 border-bottom: none !important;
             }
 
+            .tab-btn span {
+                font-size: 1.3rem;
+                margin-bottom: 2px;
+            }
+
             .tab-btn:hover {
                 background-color: transparent;
+                color: var(--accent);
             }
 
             .tab-btn.active {
                 background-color: transparent;
                 color: var(--accent);
                 border-bottom: none !important;
-                font-weight: bold;
+                font-weight: 700;
             }
 
             /* 2. Grid de Formulários */
@@ -536,15 +558,29 @@
             }
 
             /* 3. Inputs Dinâmicos de Fornecedores */
+            .mobile-only-label {
+                display: block;
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                margin-bottom: 4px;
+            }
+
+            .supplier-row .f-group {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 12px;
+            }
+
             .supplier-box .supplier-row {
                 flex-direction: column;
                 align-items: stretch;
                 background-color: rgba(255, 255, 255, 0.02);
-                padding: 12px;
-                border-radius: 8px;
+                padding: 16px;
+                border-radius: 12px;
                 border: 1px solid var(--border);
                 position: relative;
-                margin-bottom: 12px;
+                margin-bottom: 16px;
             }
 
             .supplier-box .supplier-row input {
@@ -552,12 +588,13 @@
                 box-sizing: border-box;
             }
 
-            .supplier-box .supplier-row .btn-danger {
-                align-self: flex-end;
+            .supplier-box .supplier-row .remover-fornecedor-btn {
+                align-self: stretch;
                 margin-top: 5px;
                 width: 100%;
                 text-align: center;
-                padding: 8px;
+                padding: 10px;
+                border-radius: 8px;
             }
 
             /* Ocultar cabeçalhos dinâmicos em telas pequenas, pois os inputs viram blocos */
@@ -639,9 +676,9 @@
 <div class="container">
 
     <div class="tabs-nav">
-        <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo')">🧪 Novo Insumo</button>
-        <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados')">📋 Insumos</button>
-        <button class="tab-btn" onclick="openTab('tab-drinques')">🍹 Drinques</button>
+        <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo')"><span>🧪</span> Novo Insumo</button>
+        <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados')"><span>📋</span> Insumos</button>
+        <button class="tab-btn" onclick="openTab('tab-drinques')"><span>🍹</span> Drinques</button>
     </div>
 
     <!-- ABA 1: CADASTRAR INSUMO -->
@@ -1073,15 +1110,30 @@
         const dataFmt = formatarDataParaInput(data);
         const dataPadrao = dataFmt || new Date().toISOString().split('T')[0];
         div.innerHTML = `
-            <input type="text" placeholder="Fornecedor (Ex: Mercado A)" class="f-nome" value="${nome}" required style="flex:2; min-width: 0;">
-            <input type="number" step="0.01" placeholder="Qtd Emb." class="f-qtd" value="${qtd}" required style="flex:1; min-width: 0;">
-            <input type="number" step="0.01" placeholder="Preço (R$)" class="f-preco" value="${preco}" required style="flex:1; min-width: 0;">
-            <div style="display: flex; align-items: center; gap: 2px; flex:1.1; min-width: 0;">
-                <span style="color: #fbbf24; font-weight: 900; font-size: 1.1rem; align-self: center; margin: 0 2px;">$</span>
-                <input type="number" step="0.01" placeholder="Promo" class="f-preco-promo" value="${precoPromo}" style="flex:1; min-width: 0; width: 100%;">
+            <div class="f-group" style="flex:2; min-width: 0;">
+                <label class="mobile-only-label">Fornecedor</label>
+                <input type="text" placeholder="Fornecedor (Ex: Mercado A)" class="f-nome" value="${nome}" required style="width:100%;">
             </div>
-            <input type="date" class="f-data" value="${dataPadrao}" required style="flex:1.5; min-width: 0;">
-            <button type="button" class="btn-danger" onclick="removerLinhaFornecedor(this)" style="flex-shrink: 0; padding: 6px 10px;">X</button>
+            <div class="f-group" style="flex:1; min-width: 0;">
+                <label class="mobile-only-label">Qtd Emb.</label>
+                <input type="number" step="0.01" placeholder="Qtd Emb." class="f-qtd" value="${qtd}" required style="width:100%;">
+            </div>
+            <div class="f-group" style="flex:1; min-width: 0;">
+                <label class="mobile-only-label">Preço (R$)</label>
+                <input type="number" step="0.01" placeholder="Preço (R$)" class="f-preco" value="${preco}" required style="width:100%;">
+            </div>
+            <div class="f-group" style="flex:1.1; min-width: 0;">
+                <label class="mobile-only-label">Promo (R$)</label>
+                <div style="display: flex; align-items: center; gap: 2px; width: 100%;">
+                    <span style="color: #fbbf24; font-weight: 900; font-size: 1.1rem; align-self: center; margin: 0 2px;">$</span>
+                    <input type="number" step="0.01" placeholder="Promo" class="f-preco-promo" value="${precoPromo}" style="flex:1; min-width: 0; width: 100%;">
+                </div>
+            </div>
+            <div class="f-group" style="flex:1.5; min-width: 0;">
+                <label class="mobile-only-label">Data Alt. Valor</label>
+                <input type="date" class="f-data" value="${dataPadrao}" required style="width:100%;">
+            </div>
+            <button type="button" class="btn-danger remover-fornecedor-btn" onclick="removerLinhaFornecedor(this)" style="flex-shrink: 0; padding: 6px 10px;">X</button>
         `;
         containerFornecedores.appendChild(div);
     }

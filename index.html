@@ -613,13 +613,56 @@
     </div>
 </div>
 
+<!-- Toast de Notificação -->
+<div id="toast" style="
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: var(--success);
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-weight: 600;
+    z-index: 2000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(20px);
+"></div>
+
 <script>
     let insumos = JSON.parse(localStorage.getItem('insumos_db')) || [];
     let drinques = JSON.parse(localStorage.getItem('drinques_db')) || [];
     let receitaAtual = [];
 
-    let drinqueModalId = null;
-    let rascunhoReceitaModal = [];
+    // EXIBE UMA NOTIFICAÇÃO FLUTUANTE (TOAST)
+    function mostrarNotificacao(mensagem, tipo = 'success') {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+
+        toast.innerText = mensagem;
+        if (tipo === 'success') {
+            toast.style.backgroundColor = 'var(--success)';
+        } else if (tipo === 'danger') {
+            toast.style.backgroundColor = 'var(--danger)';
+        } else {
+            toast.style.backgroundColor = 'var(--info)';
+        }
+
+        toast.style.display = 'block';
+        toast.offsetHeight; // Force reflow
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 300);
+        }, 2500);
+    }
 
     // HELPER: OBTÉM DADOS DO MAIOR PREÇO DE UM INSUMO
     function obterMaiorPrecoInsumo(insumo) {
@@ -744,7 +787,7 @@
         if (containerFornecedores.children.length > 1) {
             btn.parentElement.remove();
         } else {
-            alert("É necessário manter pelo menos um fornecedor cadastrado!");
+            mostrarNotificacao("É necessário manter pelo menos um fornecedor cadastrado!", "danger");
         }
     }
 
@@ -768,7 +811,7 @@
         });
 
         if (listaFornecedores.length === 0) {
-            alert('Adicione pelo menos um fornecedor válido!');
+            mostrarNotificacao('Adicione pelo menos um fornecedor válido!', 'danger');
             return;
         }
 
@@ -791,6 +834,7 @@
         atualizarSelectInsumos();
         recalcularReceita();
         renderDrinquesSalvos();
+        mostrarNotificacao('Insumo salvo com sucesso!');
     });
 
     function editarInsumo(id) {
@@ -931,7 +975,7 @@
         const id = Number(selectInsumo.value);
         const qtd = parseFloat(doseQtd.value);
         if (!id || !qtd) {
-            alert("Selecione um insumo e digite a quantidade!");
+            mostrarNotificacao("Selecione um insumo e digite a quantidade!", "danger");
             return;
         }
 
@@ -1025,11 +1069,11 @@
     btnSalvarDrinque.addEventListener('click', () => {
         const nome = drinqueNome.value.trim();
         if (!nome) {
-            alert('Informe o nome do drinque!');
+            mostrarNotificacao('Informe o nome do drinque!', 'danger');
             return;
         }
         if (receitaAtual.length === 0) {
-            alert('Adicione pelo menos um insumo ao drinque!');
+            mostrarNotificacao('Adicione pelo menos um insumo ao drinque!', 'danger');
             return;
         }
 
@@ -1054,7 +1098,7 @@
         salvarStorage();
         fecharModalCriarDrinque();
         renderDrinquesSalvos();
-        alert('Drinque salvo com sucesso!');
+        mostrarNotificacao('Drinque salvo com sucesso!');
     });
 
     function resetFormDrinque() {
@@ -1163,7 +1207,7 @@
 
     btnExportar.addEventListener('click', () => {
         if (insumos.length === 0 && drinques.length === 0) {
-            alert('Nenhum dado cadastrado para exportar!');
+            mostrarNotificacao('Nenhum dado cadastrado para exportar!', 'danger');
             return;
         }
         const backupData = { insumos: insumos, drinques: drinques };
@@ -1193,9 +1237,9 @@
                 atualizarSelectInsumos();
                 recalcularReceita();
                 renderDrinquesSalvos();
-                alert('Backup importado com sucesso!');
+                mostrarNotificacao('Backup importado com sucesso!');
             } catch (err) {
-                alert('Erro ao ler o arquivo de backup.');
+                mostrarNotificacao('Erro ao ler o arquivo de backup.', 'danger');
             }
         };
         reader.readAsText(file);

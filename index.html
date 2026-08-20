@@ -715,7 +715,12 @@
         <div class="card">
             <div class="card-header-actions">
                 <h2>Drinques Salvos</h2>
-                <button type="button" class="btn-success" onclick="abrirModalCriarDrinque()">🍹 Novo Drinque</button>
+                <div class="actions-group">
+                    <button type="button" class="btn-secondary" onclick="exportarDrinques()">📥 Exportar Drinques</button>
+                    <button type="button" class="btn-success" onclick="document.getElementById('file-importar-drinques').click()">📤 Importar Drinques</button>
+                    <input type="file" id="file-importar-drinques" accept=".json" style="display: none;">
+                    <button type="button" class="btn-success" onclick="abrirModalCriarDrinque()" style="background-color: var(--success); color: #fff; border-color: var(--success);">🍹 Novo Drinque</button>
+                </div>
             </div>
             <div id="lista-drinques-salvos"></div>
         </div>
@@ -1573,6 +1578,68 @@
         downloadAnchor.remove();
         mostrarNotificacao('Planilha exportada com sucesso!');
     }
+
+    function exportarDrinques() {
+        if (drinques.length === 0) {
+            mostrarNotificacao('Nenhum drinque cadastrado para exportar!', 'danger');
+            return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(drinques, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `backup_drinques_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        mostrarNotificacao('Drinques exportados com sucesso!');
+    }
+
+    document.getElementById('file-importar-drinques').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const dadosImportados = JSON.parse(event.target.result);
+                let listaNovosDrinques = [];
+                if (Array.isArray(dadosImportados)) {
+                    listaNovosDrinques = dadosImportados;
+                } else if (dadosImportados.drinques && Array.isArray(dadosImportados.drinques)) {
+                    listaNovosDrinques = dadosImportados.drinques;
+                } else {
+                    mostrarNotificacao('Arquivo inválido. Formato de drinques não reconhecido.', 'danger');
+                    return;
+                }
+
+                if (listaNovosDrinques.length === 0) {
+                    mostrarNotificacao('Nenhum drinque encontrado no arquivo.', 'danger');
+                    return;
+                }
+
+                let adicionados = 0;
+                let atualizados = 0;
+                listaNovosDrinques.forEach(novo => {
+                    const index = drinques.findIndex(d => d.id === novo.id);
+                    if (index > -1) {
+                        drinques[index] = novo;
+                        atualizados++;
+                    } else {
+                        drinques.push(novo);
+                        adicionados++;
+                    }
+                });
+
+                salvarStorage();
+                renderDrinquesSalvos();
+                mostrarNotificacao(`Importado: ${adicionados} novos, ${atualizados} atualizados!`);
+            } catch (err) {
+                mostrarNotificacao('Erro ao ler o arquivo de drinques.', 'danger');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
 
     init();
 </script>

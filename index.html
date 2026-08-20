@@ -928,6 +928,22 @@
     </div>
 </div>
 
+<!-- Modal de Confirmação Personalizado -->
+<div class="modal-overlay" id="modal-confirmar" style="z-index: 3000;">
+    <div class="modal-content" style="max-width: 340px;">
+        <div class="modal-header" style="border-bottom: none; padding-bottom: 8px;">
+            <h3 class="modal-title" style="font-size: 1.1rem;">⚠️ Confirmar Exclusão</h3>
+        </div>
+        <div class="modal-body" style="padding-top: 4px;">
+            <p id="confirmar-mensagem" style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;"></p>
+        </div>
+        <div class="modal-footer" style="gap: 10px;">
+            <button class="btn-cancelar" id="confirmar-nao" style="flex:1;">Cancelar</button>
+            <button id="confirmar-sim" style="flex:1; background-color:#ef4444; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:bold; cursor:pointer;">Excluir</button>
+        </div>
+    </div>
+</div>
+
 <!-- Toast de Notificação -->
 <div id="toast" style="
     position: fixed;
@@ -954,6 +970,25 @@
     let insumos = [];
     let drinques = [];
     let receitaAtual = [];
+
+    // MODAL DE CONFIRMAÇÃO PERSONALIZADO
+    function confirmar(mensagem, callbackSim) {
+        const overlay = document.getElementById('modal-confirmar');
+        document.getElementById('confirmar-mensagem').textContent = mensagem;
+        overlay.classList.add('active');
+
+        const btnSim = document.getElementById('confirmar-sim');
+        const btnNao = document.getElementById('confirmar-nao');
+
+        const fechar = () => {
+            overlay.classList.remove('active');
+            btnSim.onclick = null;
+            btnNao.onclick = null;
+        };
+
+        btnSim.onclick = () => { fechar(); callbackSim(); };
+        btnNao.onclick = () => fechar();
+    }
 
     function carregarLocalStorage() {
         insumos = JSON.parse(localStorage.getItem('insumos_db')) || [];
@@ -1226,7 +1261,9 @@
 
     function removerLinhaFornecedor(btn) {
         if (containerFornecedores.children.length > 1) {
-            btn.parentElement.remove();
+            confirmar('Tem certeza que deseja remover este fornecedor?', () => {
+                btn.parentElement.remove();
+            });
         } else {
             mostrarNotificacao("É necessário manter pelo menos um fornecedor cadastrado!", "danger");
         }
@@ -1321,14 +1358,15 @@
     }
 
     function excluirInsumo(id) {
-        if (!confirm("Excluir este insumo? Ele será removido das receitas.")) return;
-        insumos = insumos.filter(i => i.id !== id);
-        salvarStorage();
-        renderInsumos();
-        atualizarSelectInsumos();
-        receitaAtual = receitaAtual.filter(r => r.insumoId !== id);
-        renderReceita();
-        renderDrinquesSalvos();
+        confirmar('Excluir este insumo? Ele será removido de todas as receitas.', () => {
+            insumos = insumos.filter(i => i.id !== id);
+            salvarStorage();
+            renderInsumos();
+            atualizarSelectInsumos();
+            receitaAtual = receitaAtual.filter(r => r.insumoId !== id);
+            renderReceita();
+            renderDrinquesSalvos();
+        });
     }
 
     function renderInsumos() {
@@ -1436,8 +1474,10 @@
     });
 
     function removerDose(index) {
-        receitaAtual.splice(index, 1);
-        renderReceita();
+        confirmar('Remover este ingrediente da receita?', () => {
+            receitaAtual.splice(index, 1);
+            renderReceita();
+        });
     }
 
     function recalcularReceita() {
@@ -1562,10 +1602,13 @@
     }
 
     function excluirDrinque(id) {
-        if (!confirm("Tem certeza que deseja excluir este drinque?")) return;
-        drinques = drinques.filter(d => d.id !== id);
-        salvarStorage();
-        renderDrinquesSalvos();
+        const drinque = drinques.find(d => d.id === id);
+        const nome = drinque ? `"${drinque.nome}"` : 'este drinque';
+        confirmar(`Tem certeza que deseja excluir ${nome}?`, () => {
+            drinques = drinques.filter(d => d.id !== id);
+            salvarStorage();
+            renderDrinquesSalvos();
+        });
     }
 
     function renderDrinquesSalvos() {

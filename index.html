@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de CMV de Drinques</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;       /* Fundo principal azul-escuro profundo */
+            --card-bg: #161e2e;       /* Fundo dos painéis em azul-marinho */
+            --input-bg: #0b0f19;      /* Fundo dos inputs em azul-escuro profundo */
+            --accent: #38bdf8;        /* Azul Celeste/Ciano claro vibrante */
+            --accent-hover: #7dd3fc;  /* Azul celeste mais claro */
+            --text-main: #ffffff;     /* Branco puro para textos principais */
+            --text-muted: #94a3b8;    /* Slate 400 para labels */
+            --border: #243048;        /* Azul-marinho cinzento para bordas */
+            --danger: #f87171;        /* Vermelho pastel */
+            --success: #34d399;       /* Verde pastel */
+            --info: #38bdf8;          /* Azul celeste */
+            --hover-bg: #1e293b;      /* Slate 800 para hover nas abas */
+            --th-bg: #0f172a;         /* Fundo do header em azul-escuro */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tabs-nav {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .tab-btn {
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--accent);
+            background-color: transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            background-color: transparent;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(148, 163, 184, 0.08), 0 4px 10px -2px rgba(148, 163, 184, 0.04);
+        }
+
+        .card-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .card-header-actions h2 {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        h2 {
+            color: var(--text-main);
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 12px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        }
+
+        button {
+            background-color: var(--accent);
+            color: #0b0f19;
+            font-weight: 600;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid #334155;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-secondary:hover {
+            background-color: #334155;
+            color: #ffffff;
+            border-color: #475569;
+        }
+
+        .btn-success {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+        }
+
+        .btn-success:hover {
+            background-color: rgba(56, 189, 248, 0.25);
+            color: #7dd3fc;
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        .btn-danger {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+            border-radius: 6px;
+        }
+
+        .btn-danger:hover {
+            background-color: rgba(56, 189, 248, 0.25);
+            color: #7dd3fc;
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        .btn-edit {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            margin-right: 4px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+            border-radius: 6px;
+        }
+
+        .btn-edit:hover {
+            background-color: rgba(56, 189, 248, 0.25);
+            color: #7dd3fc;
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            border-bottom: 1px solid var(--border);
+            padding: 12px 10px;
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            background-color: var(--th-bg);
+        }
+
+        .summary-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            background-color: var(--bg-dark);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-item .value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .drink-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px -3px rgba(148, 163, 184, 0.06), 0 2px 6px -2px rgba(148, 163, 184, 0.04);
+        }
+
+        .drink-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .drink-title {
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .drink-metrics {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .drink-metrics span strong {
+            color: var(--text-main);
+        }
+
+        .empty-msg {
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 20px 25px -5px rgba(148, 163, 184, 0.15), 0 10px 10px -5px rgba(148, 163, 184, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        .input-qtde {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 8px;
+            border-radius: 6px;
+            width: 75px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .modal-add-box {
+            background-color: var(--bg-dark);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+
+        .modal-add-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-salvar {
+            background-color: var(--success);
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-salvar:hover {
+            background-color: #059669;
+        }
+
+        .btn-cancelar {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancelar:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .supplier-box {
+            background-color: var(--bg-dark);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .supplier-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .tag-max {
+            background-color: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 5px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .tag-min {
+            background-color: rgba(16, 185, 129, 0.12);
+            color: var(--success);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 5px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* ESTILOS DE RESPONSIVIDADE (MOBILE / ANDROID / IOS) */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 80px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            /* 1. Barra de Navegação no Rodapé (Estilo App Nativo) */
+            .tabs-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background-color: var(--card-bg);
+                border-top: 1px solid var(--border);
+                display: flex;
+                justify-content: space-around;
+                padding: 8px 0;
+                margin-bottom: 0;
+                z-index: 1000;
+                box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            .tab-btn {
+                flex: 1;
+                border: none;
+                background: none;
+                color: var(--text-muted);
+                font-size: 0.75rem;
+                padding: 6px 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                border-radius: 0;
+                border-bottom: none !important;
+            }
+
+            .tab-btn:hover {
+                background-color: transparent;
+            }
+
+            .tab-btn.active {
+                background-color: transparent;
+                color: var(--accent);
+                border-bottom: none !important;
+                font-weight: bold;
+            }
+
+            /* 2. Grid de Formulários */
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group[style*="grid-column"] {
+                grid-column: span 1 !important;
+            }
+
+            /* 3. Inputs Dinâmicos de Fornecedores */
+            .supplier-box .supplier-row {
+                flex-direction: column;
+                align-items: stretch;
+                background-color: rgba(255, 255, 255, 0.02);
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                position: relative;
+                margin-bottom: 12px;
+            }
+
+            .supplier-box .supplier-row input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .supplier-box .supplier-row .btn-danger {
+                align-self: flex-end;
+                margin-top: 5px;
+                width: 100%;
+                text-align: center;
+                padding: 8px;
+            }
+
+            /* Ocultar cabeçalhos dinâmicos em telas pequenas, pois os inputs viram blocos */
+            .supplier-box div[style*="display: flex; gap: 10px; margin-bottom: 6px;"] {
+                display: none !important;
+            }
+
+            /* 4. Tabelas Responsivas em Formato de Cards */
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                margin-bottom: 12px;
+                padding: 12px;
+                background-color: rgba(255, 255, 255, 0.01);
+            }
+
+            td {
+                border: none;
+                position: relative;
+                padding-left: 45%;
+                text-align: right;
+                padding-top: 8px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                font-size: 0.9rem;
+            }
+
+            td:last-child {
+                border-bottom: none;
+            }
+
+            td::before {
+                position: absolute;
+                top: 8px;
+                left: 10px;
+                width: 40%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: var(--text-muted);
+                content: attr(data-label);
+            }
+
+            /* 5. Ações da Tabela */
+            td button {
+                width: 48%;
+                margin: 1%;
+                font-size: 0.85rem;
+                padding: 8px 4px;
+            }
+
+            /* 6. Modais de Criação de Drinque */
+            .modal-content {
+                width: 95% !important;
+                max-height: 95vh !important;
+                padding: 16px !important;
+            }
+
+            .summary-box {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo')">🧪 Novo Insumo</button>
+        <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados')">📋 Insumos</button>
+        <button class="tab-btn" onclick="openTab('tab-drinques')">🍹 Drinques</button>
+    </div>
+
+    <!-- ABA 1: CADASTRAR INSUMO -->
+    <div id="tab-cadastrar-insumo" class="tab-content active">
+        <div class="card">
+            <h2 id="insumo-form-title">Cadastrar Novo Insumo</h2>
+            <form id="form-insumo">
+                <input type="hidden" id="insumo-id">
+                <div class="form-row">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="insumo-nome">Nome do Insumo</label>
+                        <input type="text" id="insumo-nome" placeholder="Ex: Gin, Xarope de Açúcar, Limão" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="insumo-unidade">Unidade Padronizada</label>
+                        <select id="insumo-unidade">
+                            <option value="ml">ml</option>
+                            <option value="g">g</option>
+                            <option value="Kg">Kg</option>
+                            <option value="un">unidade</option>
+                            <option value="Dash">Dash</option>
+                            <option value="folhas">folhas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO DINÂMICA DE FORNECEDORES -->
+                <div class="supplier-box">
+                    <label style="font-weight: bold; color: var(--text-main); margin-bottom: 12px; display: block;">
+                        Fornecedores e Preços
+                    </label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 6px; padding-right: 36px;">
+                        <label style="flex:2; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Fornecedor</label>
+                        <label style="flex:1; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Qtd Emb.</label>
+                        <label style="flex:1; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Preço (R$)</label>
+                        <label style="flex:1.1; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Promo (R$)</label>
+                        <label style="flex:1.5; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Data Alt. Valor</label>
+                    </div>
+                    <div id="container-fornecedores">
+                        <!-- Linhas de fornecedores entram via JS -->
+                    </div>
+                    <button type="button" class="btn-secondary" id="btn-add-fornecedor" style="margin-top: 5px;">+ Adicionar Fornecedor</button>
+                </div>
+
+                <button type="submit" id="btn-salvar-insumo">Salvar Insumo</button>
+                <button type="button" id="btn-cancelar-edicao" style="display:none; background:#64748b; color:#fff;">Cancelar Edição</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ABA 2: INSUMOS CADASTRADOS -->
+    <div id="tab-insumos-cadastrados" class="tab-content">
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>Insumos Cadastrados</h2>
+                <div class="actions-group">
+                    <button type="button" class="btn-secondary" onclick="exportarInsumosCSV()">📊 Exportar Planilha (Excel)</button>
+                    <button type="button" class="btn-secondary" id="btn-exportar">📥 Exportar Backup</button>
+                    <button type="button" class="btn-success" onclick="document.getElementById('file-importar').click()">📤 Importar Backup</button>
+                    <input type="file" id="file-importar" accept=".json" style="display: none;">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <input type="text" id="busca-insumo" placeholder="🔍 Buscar insumo pelo nome..." oninput="renderInsumos()" style="width: 100%; max-width: 320px;">
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Fornecedores Cadastrados</th>
+                        <th>Maior Preço (Base CMV)</th>
+                        <th>Custo Unit. Máximo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tb-insumos"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ABA 3: DRINQUES -->
+    <div id="tab-drinques" class="tab-content">
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>Drinques Salvos</h2>
+                <div class="actions-group">
+                    <button type="button" class="btn-secondary" onclick="exportarDrinques()">📥 Exportar Drinques</button>
+                    <button type="button" class="btn-success" onclick="document.getElementById('file-importar-drinques').click()">📤 Importar Drinques</button>
+                    <input type="file" id="file-importar-drinques" accept=".json" style="display: none;">
+                    <button type="button" class="btn-success" onclick="abrirModalCriarDrinque()" style="background-color: var(--success); color: #fff; border-color: var(--success);">🍹 Novo Drinque</button>
+                </div>
+            </div>
+            <div id="lista-drinques-salvos"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- JANELA MODAL DE CRIAÇÃO / EDIÇÃO DE DRINQUE -->
+<div class="modal-overlay" id="modal-criar-drinque">
+    <div class="modal-content" style="max-width: 750px; max-height: 90vh; overflow-y: auto;">
+        <h3 class="modal-title" id="drinque-form-title">Criar Drinque</h3>
+        <input type="hidden" id="drinque-id">
+        <div class="form-group">
+            <label for="drinque-nome">Nome do Drinque</label>
+            <input type="text" id="drinque-nome" placeholder="Ex: Gin Tônica Especial">
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="select-insumo">Insumo</label>
+                <select id="select-insumo"></select>
+            </div>
+            <div class="form-group">
+                <label for="dose-qtd">Quantidade Usada</label>
+                <input type="number" step="0.01" id="dose-qtd" placeholder="Ex: 50">
+            </div>
+        </div>
+        <button type="button" id="btn-add-dose" style="margin-bottom: 20px;">Adicionar Insumo à Receita</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Insumo</th>
+                    <th>Qtde</th>
+                    <th>Custo Max.</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody id="tb-receita"></tbody>
+        </table>
+
+        <div class="form-group" style="margin-top: 24px;">
+            <label for="markup">Markup (Multiplicador)</label>
+            <input type="number" step="0.1" id="markup" value="4.0">
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-item">
+                <label>Custo Max. (CMV R$)</label>
+                <span class="value" id="res-cmv-rs">R$ 0,00</span>
+            </div>
+            <div class="summary-item">
+                <label>Preço Sugerido</label>
+                <span class="value" id="res-preco-venda">R$ 0,00</span>
+            </div>
+            <div class="summary-item">
+                <label>CMV %</label>
+                <span class="value" id="res-cmv-pct">0%</span>
+            </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top: 24px;">
+            <button class="btn-cancelar" onclick="fecharModalCriarDrinque()">Cancelar</button>
+            <button class="btn-salvar" id="btn-salvar-drinque">💾 Salvar Drinque</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast de Notificação -->
+<div id="toast" style="
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: var(--success);
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-weight: 600;
+    z-index: 2000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(20px);
+"></div>
+
+<script>
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbyqU_5CUxz9yRXO3VyJphPZadJ7MOR158tZbxDkLWARhm2bqmB4F6l8-Sp61hnc0nI/exec";
+
+    let insumos = [];
+    let drinques = [];
+    let receitaAtual = [];
+
+    function carregarLocalStorage() {
+        insumos = JSON.parse(localStorage.getItem('insumos_db')) || [];
+        drinques = JSON.parse(localStorage.getItem('drinques_db')) || [];
+    }
+
+    async function carregarDadosNuvem() {
+        carregarLocalStorage();
+
+        if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("SUA_URL_DO_GOOGLE")) {
+            renderInsumos();
+            atualizarSelectInsumos();
+            renderDrinquesSalvos();
+            calcularTotais();
+            return;
+        }
+
+        try {
+            const response = await fetch(GOOGLE_SHEET_URL);
+            const data = await response.json();
+            if (data.insumos) insumos = data.insumos;
+            if (data.drinques) drinques = data.drinques;
+
+            localStorage.setItem('insumos_db', JSON.stringify(insumos));
+            localStorage.setItem('drinques_db', JSON.stringify(drinques));
+
+            renderInsumos();
+            atualizarSelectInsumos();
+            renderDrinquesSalvos();
+            calcularTotais();
+            mostrarNotificacao('Dados sincronizados com a nuvem!');
+        } catch (err) {
+            console.error('Erro ao sincronizar com a nuvem:', err);
+            mostrarNotificacao('Erro de conexão. Usando dados locais offline.', 'danger');
+            renderInsumos();
+            atualizarSelectInsumos();
+            renderDrinquesSalvos();
+            calcularTotais();
+        }
+    }
+
+    // EXIBE UMA NOTIFICAÇÃO FLUTUANTE (TOAST)
+    function mostrarNotificacao(mensagem, tipo = 'success') {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+
+        toast.innerText = mensagem;
+        if (tipo === 'success') {
+            toast.style.backgroundColor = 'var(--success)';
+        } else if (tipo === 'danger') {
+            toast.style.backgroundColor = 'var(--danger)';
+        } else {
+            toast.style.backgroundColor = 'var(--info)';
+        }
+
+        toast.style.display = 'block';
+        toast.offsetHeight; // Force reflow
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 300);
+        }, 2500);
+    }
+
+    // HELPER: OBTÉM DADOS DO MAIOR PREÇO DE UM INSUMO
+    function obterMaiorPrecoInsumo(insumo) {
+        if (!insumo || !insumo.fornecedores || insumo.fornecedores.length === 0) {
+            return { preco: 0, qtd: 1, custoUnit: 0, nomeFornecedor: 'Nenhum' };
+        }
+
+        let maior = insumo.fornecedores[0];
+        const precoAtivoInicial = (maior.precoPromo !== undefined && maior.precoPromo !== null && maior.precoPromo > 0) ? maior.precoPromo : (maior.preco || 0);
+        let maiorCustoUnit = precoAtivoInicial / (maior.qtd || 1);
+
+        insumo.fornecedores.forEach(f => {
+            const precoAtivo = (f.precoPromo !== undefined && f.precoPromo !== null && f.precoPromo > 0) ? f.precoPromo : (f.preco || 0);
+            const custoUnit = precoAtivo / (f.qtd || 1);
+            if (custoUnit > maiorCustoUnit) {
+                maiorCustoUnit = custoUnit;
+                maior = f;
+            }
+        });
+
+        const precoFinal = (maior.precoPromo !== undefined && maior.precoPromo !== null && maior.precoPromo > 0) ? maior.precoPromo : (maior.preco || 0);
+
+        return {
+            preco: precoFinal,
+            qtd: maior.qtd,
+            custoUnit: maiorCustoUnit,
+            nomeFornecedor: maior.nome
+        };
+    }
+
+    // CONVERTE DATA DD/MM/AAAA PARA YYYY-MM-DD (REQUISITO DO INPUT TYPE="DATE")
+    function formatarDataParaInput(dataStr) {
+        if (!dataStr) return '';
+        if (dataStr.includes('-')) {
+            return dataStr.split('T')[0];
+        }
+        if (dataStr.includes('/')) {
+            const partes = dataStr.split('/');
+            if (partes.length === 3) {
+                const dia = partes[0].toString().padStart(2, '0');
+                const mes = partes[1].toString().padStart(2, '0');
+                const ano = partes[2];
+                return `${ano}-${mes}-${dia}`;
+            }
+        }
+        return dataStr;
+    }
+
+    // CONVERTE QUALQUER FORMATO PARA O PADRÃO BRASILEIRO DD/MM/AAAA
+    function formatarDataParaExibicao(dataStr) {
+        if (!dataStr) return '';
+        if (dataStr.includes('/')) {
+            return dataStr;
+        }
+        if (dataStr.includes('-')) {
+            const limpaTimezone = dataStr.split('T')[0];
+            const partes = limpaTimezone.split('-');
+            if (partes.length === 3) {
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+        }
+        return dataStr;
+    }
+
+    function obterPrioridadeInsumo(nomeInsumo) {
+        const nome = (nomeInsumo || '')
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+
+        // 1. Destilados
+        const spirits = ['cachaca', 'gin', 'vodka', 'rum', 'whisky', 'whiskey', 'bourbon', 'scotch', 'tequila', 'mezcal', 'brandy', 'cognac', 'pisco', 'aguardente', 'grappa', 'singani', 'calvados'];
+        if (spirits.some(s => nome.includes(s))) return 1;
+
+        // 2. Modificadores e Licores
+        const modificadores = ['licor', 'vermute', 'vermouth', 'bitter', 'aperitivo', 'campari', 'aperol', 'amaro', 'cointreau', 'triple sec', 'curacao', 'st germain', 'absinto', 'sherry', 'jerez', 'porto'];
+        if (modificadores.some(m => nome.includes(m))) return 2;
+
+        // 3. Frutas, Sucos e Ervas (inclui limão, hortelã, manjericão, etc.)
+        const acidosFrutas = ['limao', 'laranja', 'maracuja', 'abacaxi', 'suco', 'polpa', 'morango', 'fruta', 'framboesa', 'amora', 'mirtilo', 'grapefruit', 'toranja', 'hortela', 'manjericao', 'alecrim', 'mint', 'basil', 'rosemary', 'folha', 'especiaria', 'canela', 'cravo'];
+        if (acidosFrutas.some(f => nome.includes(f))) return 3;
+
+        // 4. Adoçantes e Xaropes
+        const adocantes = ['xarope', 'acucar', 'aucar', 'sugar', 'mel', 'agave', 'pure', 'melado', 'stevia', 'simple syrup'];
+        if (adocantes.some(a => nome.includes(a))) return 4;
+
+        // 5. Bebidas com gás e Diluentes
+        const gasosas = ['agua', 'tonica', 'soda', 'refrigerante', 'refri', 'gas', 'ginger', 'cola', 'club soda', 'sprite', 'schweppes'];
+        if (gasosas.some(g => nome.includes(g))) return 5;
+
+        // 6. Gelo
+        if (nome.includes('gelo') || nome.includes('ice')) return 6;
+
+        // 7. Outros
+        return 7;
+    }
+
+    // Ordena um array de objetos insumos (com propriedade .nome)
+    function ordenarInsumos(lista) {
+        return lista.sort((a, b) => {
+            const pA = obterPrioridadeInsumo(a.nome);
+            const pB = obterPrioridadeInsumo(b.nome);
+
+            if (pA !== pB) {
+                return pA - pB;
+            }
+
+            return a.nome.localeCompare(b.nome, 'pt-BR');
+        });
+    }
+
+    // Ordena a lista de itens da receita (com propriedade .insumoId)
+    function ordenarListaReceita(lista) {
+        return lista.sort((a, b) => {
+            const insumoA = insumos.find(i => i.id === a.insumoId);
+            const insumoB = insumos.find(i => i.id === b.insumoId);
+
+            const pA = insumoA ? obterPrioridadeInsumo(insumoA.nome) : 99;
+            const pB = insumoB ? obterPrioridadeInsumo(insumoB.nome) : 99;
+
+            if (pA !== pB) {
+                return pA - pB;
+            }
+
+            const nomeA = insumoA ? insumoA.nome : '';
+            const nomeB = insumoB ? insumoB.nome : '';
+            return nomeA.localeCompare(nomeB, 'pt-BR');
+        });
+    }
+
+    function openTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+        document.getElementById(tabId).classList.add('active');
+        if(event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+    }
+
+    // ELEMENTOS DOM
+    const formInsumo = document.getElementById('form-insumo');
+    const insumoId = document.getElementById('insumo-id');
+    const insumoNome = document.getElementById('insumo-nome');
+    const insumoUnidade = document.getElementById('insumo-unidade');
+    const containerFornecedores = document.getElementById('container-fornecedores');
+    const btnAddFornecedor = document.getElementById('btn-add-fornecedor');
+    const btnCancelarEdicao = document.getElementById('btn-cancelar-edicao');
+    
+    const drinqueId = document.getElementById('drinque-id');
+    const drinqueNome = document.getElementById('drinque-nome');
+    const selectInsumo = document.getElementById('select-insumo');
+    const doseQtd = document.getElementById('dose-qtd');
+    const btnAddDose = document.getElementById('btn-add-dose');
+    const tbReceita = document.getElementById('tb-receita');
+    const tbInsumos = document.getElementById('tb-insumos');
+    const inputMarkup = document.getElementById('markup');
+    const btnSalvarDrinque = document.getElementById('btn-salvar-drinque');
+    const btnCancelarDrinqueEdicao = document.getElementById('btn-cancelar-drinque-edicao');
+    const listaDrinquesSalvos = document.getElementById('lista-drinques-salvos');
+
+    const btnExportar = document.getElementById('btn-exportar');
+    const fileImportar = document.getElementById('file-importar');
+
+    function init() {
+        resetFormInsumo();
+        carregarDadosNuvem();
+    }
+
+    // LOGICA DOS CAMPOS DINÂMICOS DE FORNECEDORES
+    btnAddFornecedor.addEventListener('click', () => adicionarLinhaFornecedor());
+
+    function adicionarLinhaFornecedor(nome = '', qtd = '', preco = '', data = '', precoPromo = '') {
+        const div = document.createElement('div');
+        div.className = 'supplier-row';
+        const dataFmt = formatarDataParaInput(data);
+        const dataPadrao = dataFmt || new Date().toISOString().split('T')[0];
+        div.innerHTML = `
+            <input type="text" placeholder="Fornecedor (Ex: Mercado A)" class="f-nome" value="${nome}" required style="flex:2; min-width: 0;">
+            <input type="number" step="0.01" placeholder="Qtd Emb." class="f-qtd" value="${qtd}" required style="flex:1; min-width: 0;">
+            <input type="number" step="0.01" placeholder="Preço (R$)" class="f-preco" value="${preco}" required style="flex:1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 2px; flex:1.1; min-width: 0;">
+                <span style="color: #fbbf24; font-weight: 900; font-size: 1.1rem; align-self: center; margin: 0 2px;">$</span>
+                <input type="number" step="0.01" placeholder="Promo" class="f-preco-promo" value="${precoPromo}" style="flex:1; min-width: 0; width: 100%;">
+            </div>
+            <input type="date" class="f-data" value="${dataPadrao}" required style="flex:1.5; min-width: 0;">
+            <button type="button" class="btn-danger" onclick="removerLinhaFornecedor(this)" style="flex-shrink: 0; padding: 6px 10px;">X</button>
+        `;
+        containerFornecedores.appendChild(div);
+    }
+
+    function removerLinhaFornecedor(btn) {
+        if (containerFornecedores.children.length > 1) {
+            btn.parentElement.remove();
+        } else {
+            mostrarNotificacao("É necessário manter pelo menos um fornecedor cadastrado!", "danger");
+        }
+    }
+
+    // SALVAR INSUMO
+    formInsumo.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = insumoId.value;
+        
+        const linhasFornecedores = containerFornecedores.querySelectorAll('.supplier-row');
+        const listaFornecedores = [];
+
+        linhasFornecedores.forEach(row => {
+            const fNome = row.querySelector('.f-nome').value.trim();
+            const fQtd = parseFloat(row.querySelector('.f-qtd').value);
+            const fPreco = parseFloat(row.querySelector('.f-preco').value);
+            const fPrecoPromoVal = row.querySelector('.f-preco-promo').value;
+            const fPrecoPromo = fPrecoPromoVal ? parseFloat(fPrecoPromoVal) : null;
+            const fData = row.querySelector('.f-data').value;
+
+            if (fNome && !isNaN(fQtd) && !isNaN(fPreco)) {
+                listaFornecedores.push({ 
+                    nome: fNome, 
+                    qtd: fQtd, 
+                    preco: fPreco, 
+                    precoPromo: fPrecoPromo, 
+                    data: fData 
+                });
+            }
+        });
+
+        if (listaFornecedores.length === 0) {
+            mostrarNotificacao('Adicione pelo menos um fornecedor válido!', 'danger');
+            return;
+        }
+
+        const dados = {
+            id: id ? Number(id) : Date.now(),
+            nome: insumoNome.value,
+            unidade: insumoUnidade.value,
+            fornecedores: listaFornecedores
+        };
+
+        if (id) {
+            insumos = insumos.map(i => i.id === dados.id ? dados : i);
+        } else {
+            insumos.push(dados);
+        }
+
+        salvarStorage();
+        resetFormInsumo();
+        renderInsumos();
+        atualizarSelectInsumos();
+        recalcularReceita();
+        renderDrinquesSalvos();
+        mostrarNotificacao('Insumo salvo com sucesso!');
+    });
+
+    function editarInsumo(id) {
+        const item = insumos.find(i => i.id === id);
+        if (!item) return;
+
+        insumoId.value = item.id;
+        insumoNome.value = item.nome;
+        insumoUnidade.value = item.unidade;
+
+        containerFornecedores.innerHTML = '';
+        if (item.fornecedores && item.fornecedores.length > 0) {
+            item.fornecedores.forEach(f => adicionarLinhaFornecedor(f.nome, f.qtd, f.preco, f.data, f.precoPromo));
+        } else if (item.preco) {
+            adicionarLinhaFornecedor('Padrão', item.qtd, item.preco, item.dataAtualizacao || '');
+        } else {
+            adicionarLinhaFornecedor();
+        }
+
+        document.getElementById('insumo-form-title').innerText = "Editar Insumo";
+        btnCancelarEdicao.style.display = "inline-block";
+        
+        document.querySelectorAll('.tab-btn')[0].click();
+    }
+
+    btnCancelarEdicao.addEventListener('click', resetFormInsumo);
+
+    function resetFormInsumo() {
+        insumoId.value = '';
+        formInsumo.reset();
+        containerFornecedores.innerHTML = '';
+        adicionarLinhaFornecedor();
+        document.getElementById('insumo-form-title').innerText = "Cadastrar Novo Insumo";
+        btnCancelarEdicao.style.display = "none";
+    }
+
+    function excluirInsumo(id) {
+        if (!confirm("Excluir este insumo? Ele será removido das receitas.")) return;
+        insumos = insumos.filter(i => i.id !== id);
+        salvarStorage();
+        renderInsumos();
+        atualizarSelectInsumos();
+        receitaAtual = receitaAtual.filter(r => r.insumoId !== id);
+        renderReceita();
+        renderDrinquesSalvos();
+    }
+
+    function renderInsumos() {
+        tbInsumos.innerHTML = '';
+        if (insumos.length === 0) {
+            tbInsumos.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhum insumo cadastrado ainda.</td></tr>';
+            return;
+        }
+
+        const termoBusca = document.getElementById('busca-insumo') ? document.getElementById('busca-insumo').value.toLowerCase().trim() : '';
+        const insumosFiltrados = ordenarInsumos(insumos.filter(i => i.nome.toLowerCase().includes(termoBusca)));
+
+        if (insumosFiltrados.length === 0) {
+            tbInsumos.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhum insumo encontrado.</td></tr>';
+            return;
+        }
+
+        insumosFiltrados.forEach(i => {
+            if (!i.fornecedores) {
+                i.fornecedores = [{ nome: 'Padrão', qtd: i.qtd || 1, preco: i.preco || 0 }];
+            }
+
+            const total = i.fornecedores.length;
+            let maxCustoUnit = null;
+            let minCustoUnit = null;
+
+            if (total > 1) {
+                const custosUnitarios = i.fornecedores.map(f => {
+                    const precoAtivo = (f.precoPromo !== undefined && f.precoPromo !== null && f.precoPromo > 0) ? f.precoPromo : (f.preco || 0);
+                    return precoAtivo / (f.qtd || 1);
+                });
+                maxCustoUnit = Math.max(...custosUnitarios);
+                minCustoUnit = Math.min(...custosUnitarios);
+            }
+
+            const listaF = i.fornecedores.map(f => {
+                const precoAtivo = (f.precoPromo !== undefined && f.precoPromo !== null && f.precoPromo > 0) ? f.precoPromo : (f.preco || 0);
+                const custoUnit = precoAtivo / (f.qtd || 1);
+                let badgeHtml = '';
+
+                if (total > 1) {
+                    if (custoUnit === maxCustoUnit) {
+                        badgeHtml = '<span class="tag-max">MAIOR</span>';
+                    } else if (custoUnit === minCustoUnit) {
+                        badgeHtml = '<span class="tag-min">MENOR</span>';
+                    }
+                }
+
+                let precoDisplay = `R$ ${f.preco.toFixed(2)}`;
+                if (f.precoPromo !== undefined && f.precoPromo !== null && f.precoPromo > 0) {
+                    precoDisplay = `<span style="text-decoration: line-through; opacity: 0.5;">R$ ${f.preco.toFixed(2)}</span> <span style="color: #fbbf24; font-weight: bold;">$ R$ ${f.precoPromo.toFixed(2)}</span>`;
+                }
+
+                return `${f.nome}: ${precoDisplay} / ${f.qtd}${i.unidade} ${badgeHtml}`;
+            }).join('<br>');
+
+            const maior = obterMaiorPrecoInsumo(i);
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td data-label="Nome"><strong>${i.nome}</strong></td>
+                <td data-label="Fornecedores" style="font-size: 0.85rem; color: var(--text-muted);">${listaF}</td>
+                <td data-label="Maior Preço">R$ ${maior.preco.toFixed(2)}</td>
+                <td data-label="Custo Unit.">R$ ${maior.custoUnit.toFixed(4)} / ${i.unidade}</td>
+                <td data-label="Ações">
+                    <button class="btn-edit" onclick="editarInsumo(${i.id})">Editar</button>
+                    <button class="btn-danger" onclick="excluirInsumo(${i.id})">Excluir</button>
+                </td>
+            `;
+            tbInsumos.appendChild(tr);
+        });
+    }
+
+    function atualizarSelectInsumos() {
+        selectInsumo.innerHTML = '';
+        const modalSelect = document.getElementById('modal-select-insumo');
+        if (modalSelect) modalSelect.innerHTML = '';
+
+        const insumosOrdenados = ordenarInsumos([...insumos]);
+        insumosOrdenados.forEach(i => {
+            const opt = document.createElement('option');
+            opt.value = i.id;
+            opt.textContent = `${i.nome} (${i.unidade})`;
+            selectInsumo.appendChild(opt);
+
+            if (modalSelect) {
+                const optModal = opt.cloneNode(true);
+                modalSelect.appendChild(optModal);
+            }
+        });
+    }
+
+    // MONTAR DRINQUES
+    btnAddDose.addEventListener('click', () => {
+        const id = Number(selectInsumo.value);
+        const qtd = parseFloat(doseQtd.value);
+        if (!id || !qtd) {
+            mostrarNotificacao("Selecione um insumo e digite a quantidade!", "danger");
+            return;
+        }
+
+        receitaAtual.push({ insumoId: id, qtd: qtd });
+        doseQtd.value = '';
+        renderReceita();
+    });
+
+    function removerDose(index) {
+        receitaAtual.splice(index, 1);
+        renderReceita();
+    }
+
+    function recalcularReceita() {
+        renderReceita();
+    }
+
+    function renderReceita() {
+        tbReceita.innerHTML = '';
+        ordenarListaReceita(receitaAtual);
+
+        receitaAtual.forEach((item, index) => {
+            const insumo = insumos.find(i => i.id === item.insumoId);
+            if (!insumo) return;
+
+            const dadosPreco = obterMaiorPrecoInsumo(insumo);
+            const custoDose = dadosPreco.custoUnit * item.qtd;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td data-label="Insumo">${insumo.nome}</td>
+                <td data-label="Qtde">
+                    <input 
+                        type="number" 
+                        class="input-qtde" 
+                        value="${item.qtd}" 
+                        min="0"
+                        step="any"
+                        oninput="atualizarQtdReceita(${index}, this.value)"
+                        style="width: 80px; padding: 6px; text-align: center;"
+                    />
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">${insumo.unidade}</span>
+                </td>
+                <td data-label="Custo Max." id="cost-${index}">R$ ${custoDose.toFixed(2)}</td>
+                <td data-label="Ação"><button class="btn-danger" onclick="removerDose(${index})">X</button></td>
+            `;
+            tbReceita.appendChild(tr);
+        });
+        calcularTotais();
+    }
+
+    function atualizarQtdReceita(index, novaQtd) {
+        const qtdNum = parseFloat(novaQtd) || 0;
+        receitaAtual[index].qtd = qtdNum;
+
+        const insumo = insumos.find(i => i.id === receitaAtual[index].insumoId);
+        if (insumo) {
+            const dadosPreco = obterMaiorPrecoInsumo(insumo);
+            const custoDose = dadosPreco.custoUnit * qtdNum;
+            const costCell = document.getElementById(`cost-${index}`);
+            if (costCell) {
+                costCell.innerText = `R$ ${custoDose.toFixed(2)}`;
+            }
+        }
+        calcularTotais();
+    }
+
+    inputMarkup.addEventListener('input', calcularTotais);
+
+    function calcularTotais() {
+        let cmvTotal = 0;
+        receitaAtual.forEach(item => {
+            const insumo = insumos.find(i => i.id === item.insumoId);
+            if (insumo) {
+                const dadosPreco = obterMaiorPrecoInsumo(insumo);
+                cmvTotal += dadosPreco.custoUnit * item.qtd;
+            }
+        });
+
+        const markup = parseFloat(inputMarkup.value) || 0;
+        const precoVenda = cmvTotal * markup;
+        const cmvPct = precoVenda > 0 ? (cmvTotal / precoVenda) * 100 : 0;
+
+        document.getElementById('res-cmv-rs').innerText = `R$ ${cmvTotal.toFixed(2)}`;
+        document.getElementById('res-preco-venda').innerText = `R$ ${precoVenda.toFixed(2)}`;
+        document.getElementById('res-cmv-pct').innerText = `${cmvPct.toFixed(1)}%`;
+
+        return { cmvTotal, precoVenda, cmvPct, markup };
+    }
+
+    btnSalvarDrinque.addEventListener('click', () => {
+        const nome = drinqueNome.value.trim();
+        if (!nome) {
+            mostrarNotificacao('Informe o nome do drinque!', 'danger');
+            return;
+        }
+        if (receitaAtual.length === 0) {
+            mostrarNotificacao('Adicione pelo menos um insumo ao drinque!', 'danger');
+            return;
+        }
+
+        const id = drinqueId.value ? Number(drinqueId.value) : Date.now();
+        const totais = calcularTotais();
+
+        ordenarListaReceita(receitaAtual);
+
+        const novoDrinque = {
+            id: id,
+            nome: nome,
+            receita: [...receitaAtual],
+            markup: totais.markup
+        };
+
+        if (drinqueId.value) {
+            drinques = drinques.map(d => d.id === id ? novoDrinque : d);
+        } else {
+            drinques.push(novoDrinque);
+        }
+
+        salvarStorage();
+        fecharModalCriarDrinque();
+        renderDrinquesSalvos();
+        mostrarNotificacao('Drinque salvo com sucesso!');
+    });
+
+    function resetFormDrinque() {
+        drinqueId.value = '';
+        drinqueNome.value = '';
+        receitaAtual = [];
+        inputMarkup.value = '4.0';
+        document.getElementById('drinque-form-title').innerText = "Criar Drinque";
+        renderReceita();
+    }
+
+    function excluirDrinque(id) {
+        if (!confirm("Tem certeza que deseja excluir este drinque?")) return;
+        drinques = drinques.filter(d => d.id !== id);
+        salvarStorage();
+        renderDrinquesSalvos();
+    }
+
+    function renderDrinquesSalvos() {
+        listaDrinquesSalvos.innerHTML = '';
+
+        if (drinques.length === 0) {
+            listaDrinquesSalvos.innerHTML = '<div class="empty-msg">Nenhum drinque salvo até o momento.</div>';
+            return;
+        }
+
+        drinques.forEach(d => {
+            let cmvAtualizado = 0;
+            let linhasInsumos = '';
+
+            ordenarListaReceita(d.receita);
+
+            d.receita.forEach(item => {
+                const insumo = insumos.find(i => i.id === item.insumoId);
+                if (insumo) {
+                    const dadosPreco = obterMaiorPrecoInsumo(insumo);
+                    const custoDose = dadosPreco.custoUnit * item.qtd;
+                    cmvAtualizado += custoDose;
+                    linhasInsumos += `<li>${insumo.nome}: ${item.qtd} ${insumo.unidade} (R$ ${custoDose.toFixed(2)})</li>`;
+                } else {
+                    linhasInsumos += `<li style="color:var(--danger)">Insumo removido (${item.qtd})</li>`;
+                }
+            });
+
+            const markup = d.markup || 4.0;
+            const precoVendaAtualizado = cmvAtualizado * markup;
+            const cmvPctAtualizado = precoVendaAtualizado > 0 ? (cmvAtualizado / precoVendaAtualizado) * 100 : 0;
+
+            const div = document.createElement('div');
+            div.className = 'drink-card';
+            div.innerHTML = `
+                <div class="drink-header">
+                    <span class="drink-title">${d.nome}</span>
+                    <div>
+                        <button class="btn-edit" onclick="abrirModalEditarDrinque(${d.id})">Editar</button>
+                        <button class="btn-danger" onclick="excluirDrinque(${d.id})">Excluir</button>
+                    </div>
+                </div>
+                <div class="drink-metrics">
+                    <span>CMV Máximo: <strong>R$ ${cmvAtualizado.toFixed(2)}</strong></span>
+                    <span>Markup: <strong>${markup}x</strong></span>
+                    <span>Preço Sugerido: <strong>R$ ${precoVendaAtualizado.toFixed(2)}</strong></span>
+                    <span>CMV %: <strong>${cmvPctAtualizado.toFixed(1)}%</strong></span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                    <strong>Insumos & Doses (Base Preço Teto):</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        ${linhasInsumos}
+                    </ul>
+                </div>
+            `;
+            listaDrinquesSalvos.appendChild(div);
+        });
+    }
+
+    // JANELA MODAL DE CRIAÇÃO / EDIÇÃO DE DRINQUES
+    function abrirModalCriarDrinque() {
+        resetFormDrinque();
+        document.getElementById('drinque-form-title').innerText = "Criar Novo Drinque";
+        document.getElementById('modal-criar-drinque').classList.add('active');
+    }
+
+    function abrirModalEditarDrinque(id) {
+        const d = drinques.find(item => item.id === id);
+        if (!d) return;
+
+        drinqueId.value = d.id;
+        drinqueNome.value = d.nome;
+        inputMarkup.value = d.markup || 4.0;
+        receitaAtual = JSON.parse(JSON.stringify(d.receita));
+
+        document.getElementById('drinque-form-title').innerText = `Editar Drinque - ${d.nome}`;
+        renderReceita();
+        document.getElementById('modal-criar-drinque').classList.add('active');
+    }
+
+    function fecharModalCriarDrinque() {
+        document.getElementById('modal-criar-drinque').classList.remove('active');
+        resetFormDrinque();
+    }
+
+    async function salvarStorage() {
+        localStorage.setItem('insumos_db', JSON.stringify(insumos));
+        localStorage.setItem('drinques_db', JSON.stringify(drinques));
+
+        if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("SUA_URL_DO_GOOGLE")) {
+            return;
+        }
+
+        try {
+            await fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify({ insumos: insumos, drinques: drinques })
+            });
+            mostrarNotificacao('Alterações salvas na nuvem!');
+        } catch (err) {
+            console.error('Erro ao salvar na nuvem:', err);
+            mostrarNotificacao('Salvo localmente (erro de conexão com a nuvem).', 'danger');
+        }
+    }
+
+    btnExportar.addEventListener('click', () => {
+        if (insumos.length === 0 && drinques.length === 0) {
+            mostrarNotificacao('Nenhum dado cadastrado para exportar!', 'danger');
+            return;
+        }
+        const backupData = { insumos: insumos, drinques: drinques };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `backup_cmv_drinques_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    });
+
+    fileImportar.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const dadosImportados = JSON.parse(event.target.result);
+                if (dadosImportados.insumos || dadosImportados.drinques) {
+                    insumos = dadosImportados.insumos || [];
+                    drinques = dadosImportados.drinques || [];
+                }
+                salvarStorage();
+                renderInsumos();
+                atualizarSelectInsumos();
+                recalcularReceita();
+                renderDrinquesSalvos();
+                mostrarNotificacao('Backup importado com sucesso!');
+            } catch (err) {
+                mostrarNotificacao('Erro ao ler o arquivo de backup.', 'danger');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    function exportarInsumosCSV() {
+        if (insumos.length === 0) {
+            mostrarNotificacao('Nenhum insumo cadastrado para exportar!', 'danger');
+            return;
+        }
+
+        // Cabeçalhos do CSV
+        let csvContent = "Insumo;Unidade Padronizada;Fornecedor;Qtd Embalagem;Preço Embalagem (R$);Preço Promoção (R$);Custo Unitário (R$);Última Alt. Valor\r\n";
+
+        insumos.forEach(i => {
+            const fornecedores = i.fornecedores || [];
+            fornecedores.forEach(f => {
+                const precoAtivo = (f.precoPromo !== undefined && f.precoPromo !== null && f.precoPromo > 0) ? f.precoPromo : (f.preco || 0);
+                const custoUnit = precoAtivo / (f.qtd || 1);
+                
+                const dataFormatada = f.data ? formatarDataParaExibicao(f.data) : '-';
+
+                const nomeInsumo = i.nome.replace(/"/g, '""');
+                const unidade = i.unidade.replace(/"/g, '""');
+                const nomeFornecedor = f.nome.replace(/"/g, '""');
+
+                // Formatação brasileira compatível nativamente com Excel
+                const qtdFmt = f.qtd.toString().replace('.', ',');
+                const precoFmt = f.preco.toFixed(2).replace('.', ',');
+                const promoFmt = (f.precoPromo !== undefined && f.precoPromo !== null && f.precoPromo > 0) ? f.precoPromo.toFixed(2).replace('.', ',') : '';
+                const custoFmt = custoUnit.toFixed(4).replace('.', ',');
+
+                csvContent += `"${nomeInsumo}";"${unidade}";"${nomeFornecedor}";${qtdFmt};${precoFmt};"${promoFmt}";${custoFmt};"${dataFormatada}"\r\n`;
+            });
+        });
+
+        // BOM UTF-8 para Excel reconhecer acentuação em português
+        const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", url);
+        downloadAnchor.setAttribute("download", `planilha_insumos_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        mostrarNotificacao('Planilha exportada com sucesso!');
+    }
+
+    function exportarDrinques() {
+        if (drinques.length === 0) {
+            mostrarNotificacao('Nenhum drinque cadastrado para exportar!', 'danger');
+            return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(drinques, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `backup_drinques_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        mostrarNotificacao('Drinques exportados com sucesso!');
+    }
+
+    document.getElementById('file-importar-drinques').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const dadosImportados = JSON.parse(event.target.result);
+                let listaNovosDrinques = [];
+                if (Array.isArray(dadosImportados)) {
+                    listaNovosDrinques = dadosImportados;
+                } else if (dadosImportados.drinques && Array.isArray(dadosImportados.drinques)) {
+                    listaNovosDrinques = dadosImportados.drinques;
+                } else {
+                    mostrarNotificacao('Arquivo inválido. Formato de drinques não reconhecido.', 'danger');
+                    return;
+                }
+
+                if (listaNovosDrinques.length === 0) {
+                    mostrarNotificacao('Nenhum drinque encontrado no arquivo.', 'danger');
+                    return;
+                }
+
+                let adicionados = 0;
+                let atualizados = 0;
+                listaNovosDrinques.forEach(novo => {
+                    const index = drinques.findIndex(d => d.id === novo.id);
+                    if (index > -1) {
+                        drinques[index] = novo;
+                        atualizados++;
+                    } else {
+                        drinques.push(novo);
+                        adicionados++;
+                    }
+                });
+
+                salvarStorage();
+                renderDrinquesSalvos();
+                mostrarNotificacao(`Importado: ${adicionados} novos, ${atualizados} atualizados!`);
+            } catch (err) {
+                mostrarNotificacao('Erro ao ler o arquivo de drinques.', 'danger');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    init();
+</script>
+
+</body>
+</html>

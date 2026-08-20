@@ -756,9 +756,9 @@
 <div class="container">
 
     <div class="tabs-nav">
-        <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo')"><span>🧪</span> Novo Insumo</button>
-        <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados')"><span>📋</span> Insumos</button>
-        <button class="tab-btn" onclick="openTab('tab-drinques')"><span>🍹</span> Drinques</button>
+        <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo', this)"><span>🧪</span> Novo Insumo</button>
+        <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados', this)"><span>📋</span> Insumos</button>
+        <button class="tab-btn" onclick="openTab('tab-drinques', this)"><span>🍹</span> Drinques</button>
     </div>
 
     <!-- ABA 1: CADASTRAR INSUMO -->
@@ -1230,13 +1230,13 @@
         });
     }
 
-    function openTab(tabId) {
+    function openTab(tabId, el) {
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
         document.getElementById(tabId).classList.add('active');
-        if(event && event.currentTarget) {
-            event.currentTarget.classList.add('active');
+        if (el) {
+            el.classList.add('active');
         }
     }
 
@@ -1437,11 +1437,17 @@
             adicionarLinhaFornecedorModal();
         }
 
-        document.getElementById('modal-editar-insumo').classList.add('active');
+        const modal = document.getElementById('modal-editar-insumo');
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.classList.add('active');
     }
 
     function fecharModalEditarInsumo() {
-        document.getElementById('modal-editar-insumo').classList.remove('active');
+        const modal = document.getElementById('modal-editar-insumo');
+        modal.classList.remove('active');
+        modal.style.visibility = '';
+        modal.style.opacity = '';
     }
 
     document.getElementById('btn-salvar-edicao-insumo').addEventListener('click', () => {

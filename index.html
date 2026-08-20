@@ -514,6 +514,7 @@
             <div class="card-header-actions">
                 <h2>Insumos Cadastrados</h2>
                 <div class="actions-group">
+                    <button type="button" class="btn-secondary" onclick="exportarInsumosCSV()">📊 Exportar Planilha (Excel)</button>
                     <button type="button" class="btn-secondary" id="btn-exportar">📥 Exportar Backup</button>
                     <button type="button" class="btn-success" onclick="document.getElementById('file-importar').click()">📤 Importar Backup</button>
                     <input type="file" id="file-importar" accept=".json" style="display: none;">
@@ -1245,6 +1246,53 @@
         reader.readAsText(file);
         e.target.value = '';
     });
+
+    function exportarInsumosCSV() {
+        if (insumos.length === 0) {
+            mostrarNotificacao('Nenhum insumo cadastrado para exportar!', 'danger');
+            return;
+        }
+
+        // Cabeçalhos do CSV
+        let csvContent = "Insumo;Unidade Padronizada;Fornecedor;Qtd Embalagem;Preço Embalagem (R$);Custo Unitário (R$);Última Alt. Valor\r\n";
+
+        insumos.forEach(i => {
+            const fornecedores = i.fornecedores || [];
+            fornecedores.forEach(f => {
+                const custoUnit = (f.preco || 0) / (f.qtd || 1);
+                
+                let dataFormatada = '-';
+                if (f.data) {
+                    const partes = f.data.split('-');
+                    if (partes.length === 3) {
+                        dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                    }
+                }
+
+                const nomeInsumo = i.nome.replace(/"/g, '""');
+                const unidade = i.unidade.replace(/"/g, '""');
+                const nomeFornecedor = f.nome.replace(/"/g, '""');
+
+                // Formatação brasileira compatível nativamente com Excel
+                const qtdFmt = f.qtd.toString().replace('.', ',');
+                const precoFmt = f.preco.toFixed(2).replace('.', ',');
+                const custoFmt = custoUnit.toFixed(4).replace('.', ',');
+
+                csvContent += `"${nomeInsumo}";"${unidade}";"${nomeFornecedor}";${qtdFmt};${precoFmt};${custoFmt};"${dataFormatada}"\r\n`;
+            });
+        });
+
+        // BOM UTF-8 para Excel reconhecer acentuação em português
+        const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", url);
+        downloadAnchor.setAttribute("download", `planilha_insumos_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        mostrarNotificacao('Planilha exportada com sucesso!');
+    }
 
     init();
 </script>

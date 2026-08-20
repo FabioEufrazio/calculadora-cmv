@@ -633,9 +633,51 @@
 "></div>
 
 <script>
-    let insumos = JSON.parse(localStorage.getItem('insumos_db')) || [];
-    let drinques = JSON.parse(localStorage.getItem('drinques_db')) || [];
+    const GOOGLE_SHEET_URL = "SUA_URL_DO_GOOGLE_APPS_SCRIPT_AQUI";
+
+    let insumos = [];
+    let drinques = [];
     let receitaAtual = [];
+
+    function carregarLocalStorage() {
+        insumos = JSON.parse(localStorage.getItem('insumos_db')) || [];
+        drinques = JSON.parse(localStorage.getItem('drinques_db')) || [];
+    }
+
+    async function carregarDadosNuvem() {
+        carregarLocalStorage();
+
+        if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("SUA_URL_DO_GOOGLE")) {
+            renderInsumos();
+            atualizarSelectInsumos();
+            renderDrinquesSalvos();
+            calcularTotais();
+            return;
+        }
+
+        try {
+            const response = await fetch(GOOGLE_SHEET_URL);
+            const data = await response.json();
+            if (data.insumos) insumos = data.insumos;
+            if (data.drinques) drinques = data.drinques;
+
+            localStorage.setItem('insumos_db', JSON.stringify(insumos));
+            localStorage.setItem('drinques_db', JSON.stringify(drinques));
+
+            renderInsumos();
+            atualizarSelectInsumos();
+            renderDrinquesSalvos();
+            calcularTotais();
+            mostrarNotificacao('Dados sincronizados com a nuvem!');
+        } catch (err) {
+            console.error('Erro ao sincronizar com a nuvem:', err);
+            mostrarNotificacao('Erro de conexão. Usando dados locais offline.', 'danger');
+            renderInsumos();
+            atualizarSelectInsumos();
+            renderDrinquesSalvos();
+            calcularTotais();
+        }
+    }
 
     // EXIBE UMA NOTIFICAÇÃO FLUTUANTE (TOAST)
     function mostrarNotificacao(mensagem, tipo = 'success') {
@@ -761,10 +803,7 @@
 
     function init() {
         resetFormInsumo();
-        renderInsumos();
-        atualizarSelectInsumos();
-        renderDrinquesSalvos();
-        calcularTotais();
+        carregarDadosNuvem();
     }
 
     // LOGICA DOS CAMPOS DINÂMICOS DE FORNECEDORES
@@ -1201,9 +1240,27 @@
         resetFormDrinque();
     }
 
-    function salvarStorage() {
+    async function salvarStorage() {
         localStorage.setItem('insumos_db', JSON.stringify(insumos));
         localStorage.setItem('drinques_db', JSON.stringify(drinques));
+
+        if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("SUA_URL_DO_GOOGLE")) {
+            return;
+        }
+
+        try {
+            await fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify({ insumos: insumos, drinques: drinques })
+            });
+            mostrarNotificacao('Alterações salvas na nuvem!');
+        } catch (err) {
+            console.error('Erro ao salvar na nuvem:', err);
+            mostrarNotificacao('Salvo localmente (erro de conexão com a nuvem).', 'danger');
+        }
     }
 
     btnExportar.addEventListener('click', () => {

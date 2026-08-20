@@ -456,6 +456,170 @@
             margin-left: 5px;
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
+
+        /* ESTILOS DE RESPONSIVIDADE (MOBILE / ANDROID / IOS) */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 80px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            /* 1. Barra de Navegação no Rodapé (Estilo App Nativo) */
+            .tabs-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background-color: var(--card-bg);
+                border-top: 1px solid var(--border);
+                display: flex;
+                justify-content: space-around;
+                padding: 8px 0;
+                margin-bottom: 0;
+                z-index: 1000;
+                box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            .tab-btn {
+                flex: 1;
+                border: none;
+                background: none;
+                color: var(--text-muted);
+                font-size: 0.75rem;
+                padding: 6px 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                border-radius: 0;
+                border-bottom: none !important;
+            }
+
+            .tab-btn:hover {
+                background-color: transparent;
+            }
+
+            .tab-btn.active {
+                background-color: transparent;
+                color: var(--accent);
+                border-bottom: none !important;
+                font-weight: bold;
+            }
+
+            /* 2. Grid de Formulários */
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group[style*="grid-column"] {
+                grid-column: span 1 !important;
+            }
+
+            /* 3. Inputs Dinâmicos de Fornecedores */
+            .supplier-box .supplier-row {
+                flex-direction: column;
+                align-items: stretch;
+                background-color: rgba(255, 255, 255, 0.02);
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                position: relative;
+                margin-bottom: 12px;
+            }
+
+            .supplier-box .supplier-row input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .supplier-box .supplier-row .btn-danger {
+                align-self: flex-end;
+                margin-top: 5px;
+                width: 100%;
+                text-align: center;
+                padding: 8px;
+            }
+
+            /* Ocultar cabeçalhos dinâmicos em telas pequenas, pois os inputs viram blocos */
+            .supplier-box div[style*="display: flex; gap: 10px; margin-bottom: 6px;"] {
+                display: none !important;
+            }
+
+            /* 4. Tabelas Responsivas em Formato de Cards */
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                margin-bottom: 12px;
+                padding: 12px;
+                background-color: rgba(255, 255, 255, 0.01);
+            }
+
+            td {
+                border: none;
+                position: relative;
+                padding-left: 45%;
+                text-align: right;
+                padding-top: 8px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                font-size: 0.9rem;
+            }
+
+            td:last-child {
+                border-bottom: none;
+            }
+
+            td::before {
+                position: absolute;
+                top: 8px;
+                left: 10px;
+                width: 40%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: var(--text-muted);
+                content: attr(data-label);
+            }
+
+            /* 5. Ações da Tabela */
+            td button {
+                width: 48%;
+                margin: 1%;
+                font-size: 0.85rem;
+                padding: 8px 4px;
+            }
+
+            /* 6. Modais de Criação de Drinque */
+            .modal-content {
+                width: 95% !important;
+                max-height: 95vh !important;
+                padding: 16px !important;
+            }
+
+            .summary-box {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -463,9 +627,9 @@
 <div class="container">
 
     <div class="tabs-nav">
-        <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo')">Cadastrar Insumo</button>
-        <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados')">Insumos Cadastrados</button>
-        <button class="tab-btn" onclick="openTab('tab-drinques')">Drinques</button>
+        <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo')">🧪 Novo Insumo</button>
+        <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados')">📋 Insumos</button>
+        <button class="tab-btn" onclick="openTab('tab-drinques')">🍹 Drinques</button>
     </div>
 
     <!-- ABA 1: CADASTRAR INSUMO -->
@@ -1016,11 +1180,11 @@
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>${i.nome}</strong></td>
-                <td style="font-size: 0.85rem; color: var(--text-muted);">${listaF}</td>
-                <td>R$ ${maior.preco.toFixed(2)}</td>
-                <td>R$ ${maior.custoUnit.toFixed(4)} / ${i.unidade}</td>
-                <td>
+                <td data-label="Nome"><strong>${i.nome}</strong></td>
+                <td data-label="Fornecedores" style="font-size: 0.85rem; color: var(--text-muted);">${listaF}</td>
+                <td data-label="Maior Preço">R$ ${maior.preco.toFixed(2)}</td>
+                <td data-label="Custo Unit.">R$ ${maior.custoUnit.toFixed(4)} / ${i.unidade}</td>
+                <td data-label="Ações">
                     <button class="btn-edit" onclick="editarInsumo(${i.id})">Editar</button>
                     <button class="btn-danger" onclick="excluirInsumo(${i.id})">Excluir</button>
                 </td>
@@ -1084,8 +1248,8 @@
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${insumo.nome}</td>
-                <td>
+                <td data-label="Insumo">${insumo.nome}</td>
+                <td data-label="Qtde">
                     <input 
                         type="number" 
                         class="input-qtde" 
@@ -1097,8 +1261,8 @@
                     />
                     <span style="color: var(--text-muted); font-size: 0.85rem;">${insumo.unidade}</span>
                 </td>
-                <td id="cost-${index}">R$ ${custoDose.toFixed(2)}</td>
-                <td><button class="btn-danger" onclick="removerDose(${index})">X</button></td>
+                <td data-label="Custo Max." id="cost-${index}">R$ ${custoDose.toFixed(2)}</td>
+                <td data-label="Ação"><button class="btn-danger" onclick="removerDose(${index})">X</button></td>
             `;
             tbReceita.appendChild(tr);
         });

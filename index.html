@@ -1174,22 +1174,38 @@
             const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
             const user = userCredential.user;
             
-            await user.updateProfile({ displayName: name });
+            // Tenta atualizar o nome do perfil
+            try {
+                await user.updateProfile({ displayName: name });
+            } catch(e) { console.warn("Aviso ao atualizar perfil:", e); }
             
-            await db.collection('users').doc(user.uid).set({
-                nome: name,
-                telefone: phone,
-                email: email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            // Tenta salvar os dados extras no banco de dados (se der erro de permissão, não quebra a tela)
+            try {
+                await db.collection('users').doc(user.uid).set({
+                    nome: name,
+                    telefone: phone,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch(dbErr) {
+                console.error("Aviso no Firestore (As regras podem estar bloqueando):", dbErr);
+            }
 
-            await user.sendEmailVerification();
-            mostrarNotificacao('Conta criada! Verifique seu e-mail para confirmar.', 'success');
+            // Tenta enviar o e-mail (se o provedor bloquear, não quebra a tela)
+            try {
+                await user.sendEmailVerification();
+            } catch (mailErr) {
+                console.error("Aviso no disparo de e-mail:", mailErr);
+            }
             
-            await auth.signOut();
-            toggleAuthMode('login');
+            mostrarNotificacao('Conta criada com sucesso! Bem-vindo(a).', 'success');
+            
+            // Como desativamos a verificação obrigatória, não vamos mais deslogar.
+            // O onAuthStateChanged já vai abrir o app automaticamente!
+
         } catch (e) {
-            mostrarNotificacao(traduzirErroAuth(e.code), 'danger');
+            const msgErro = traduzirErroAuth(e.code);
+            mostrarNotificacao(msgErro === 'Ocorreu um erro inesperado. Tente novamente.' ? `Erro: ${e.code || e.message}` : msgErro, 'danger');
         }
     });
 

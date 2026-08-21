@@ -1099,6 +1099,20 @@
         }
     });
 
+    // TRADUTOR DE ERROS DO FIREBASE
+    function traduzirErroAuth(codigo) {
+        switch (codigo) {
+            case 'auth/email-already-in-use': return 'Este e-mail já está cadastrado. Vá na aba Entrar.';
+            case 'auth/invalid-email': return 'Formato de e-mail inválido.';
+            case 'auth/weak-password': return 'A senha é muito fraca (mínimo de 6 caracteres).';
+            case 'auth/user-not-found': return 'Nenhuma conta encontrada com este e-mail.';
+            case 'auth/wrong-password': return 'Senha incorreta.';
+            case 'auth/invalid-credential': return 'E-mail ou senha incorretos.';
+            case 'auth/too-many-requests': return 'Muitas tentativas falhas. Tente novamente mais tarde.';
+            default: return 'Ocorreu um erro inesperado. Tente novamente.';
+        }
+    }
+
     document.getElementById('btn-do-login').addEventListener('click', async () => {
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-password').value;
@@ -1109,7 +1123,7 @@
         try {
             await auth.signInWithEmailAndPassword(email, pass);
         } catch (e) {
-            mostrarNotificacao('Erro ao entrar: Verifique e-mail e senha.', 'danger');
+            mostrarNotificacao(traduzirErroAuth(e.code), 'danger');
         }
     });
 
@@ -1133,10 +1147,8 @@
             const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
             const user = userCredential.user;
             
-            // Atualiza o nome no perfil do Firebase Auth
             await user.updateProfile({ displayName: name });
             
-            // Salva dados extras no Firestore
             await db.collection('users').doc(user.uid).set({
                 nome: name,
                 telefone: phone,
@@ -1144,15 +1156,13 @@
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
 
-            // Envia e-mail de verificação
             await user.sendEmailVerification();
             mostrarNotificacao('Conta criada! Verifique seu e-mail para confirmar.', 'success');
             
-            // Desloga imediatamente para obrigar a verificação
             await auth.signOut();
             toggleAuthMode('login');
         } catch (e) {
-            mostrarNotificacao('Erro ao criar conta: ' + e.message, 'danger');
+            mostrarNotificacao(traduzirErroAuth(e.code), 'danger');
         }
     });
 

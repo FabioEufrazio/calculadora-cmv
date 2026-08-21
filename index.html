@@ -1107,12 +1107,12 @@
     auth.onAuthStateChanged(user => {
         const authScreen = document.getElementById('auth-screen');
         if (user) {
-            // DESATIVADO TEMPORARIAMENTE PARA TESTES DO MVP
-            // if (!user.emailVerified) {
-            //     mostrarNotificacao('Por favor, verifique seu e-mail antes de acessar.', 'danger');
-            //     auth.signOut();
-            //     return;
-            // }
+            // BARREIRA DE SEGURANÇA: Obriga verificação de e-mail
+            if (!user.emailVerified) {
+                mostrarNotificacao('Por favor, verifique seu e-mail antes de acessar.', 'danger');
+                auth.signOut();
+                return;
+            }
             currentUser = user;
             authScreen.style.display = 'none';
             carregarDadosNuvem(); // Carrega do Firestore
@@ -1198,10 +1198,11 @@
                 console.error("Aviso no disparo de e-mail:", mailErr);
             }
             
-            mostrarNotificacao('Conta criada com sucesso! Bem-vindo(a).', 'success');
+            mostrarNotificacao('Conta criada com sucesso! Verifique seu e-mail para confirmar.', 'success');
             
-            // Como desativamos a verificação obrigatória, não vamos mais deslogar.
-            // O onAuthStateChanged já vai abrir o app automaticamente!
+            // Desloga o usuário recém-criado imediatamente para obrigá-lo a verificar o e-mail
+            await auth.signOut();
+            toggleAuthMode('login');
 
         } catch (e) {
             const msgErro = traduzirErroAuth(e.code);

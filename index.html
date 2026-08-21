@@ -829,7 +829,37 @@
     <div class="tabs-nav" style="grid-template-columns: 1fr 1fr auto;">
         <button class="tab-btn active" onclick="openTab('tab-insumos-cadastrados', this)"><span>📋</span> Insumos</button>
         <button class="tab-btn" onclick="openTab('tab-drinques', this)"><span>🍹</span> Drinques</button>
+        <button class="tab-btn" id="btn-tab-admin" style="display: none;" onclick="openTab('tab-admin', this)"><span>👑</span> Admin</button>
         <button class="tab-btn" id="btn-logout" style="color: var(--danger); font-size: 0.85rem; padding: 10px; border-radius: 8px;"><span>🚪</span> Sair</button>
+    </div>
+
+    <!-- ABA ADMIN: PAINEL DE CONTROLE -->
+    <div id="tab-admin" class="tab-content">
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>👑 Painel de Administração</h2>
+                <button type="button" class="btn-secondary" onclick="carregarListaUsuarios()">🔄 Atualizar Lista</button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Visão geral de todos os clientes cadastrados na plataforma.</p>
+            
+            <div class="table-responsive">
+                <table id="tabela-usuarios">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Celular</th>
+                            <th>Data de Cadastro</th>
+                            <th>Qtd Insumos</th>
+                            <th>Qtd Drinques</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Renderizado via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- ABA 1: INSUMOS CADASTRADOS -->
@@ -1060,6 +1090,70 @@
         }
     }
 
+    // CONSTANTES DE ADMINISTRAÇÃO
+    // Adicione o seu e-mail de dono aqui para liberar a aba Admin
+    const ADMIN_EMAILS = ['fabioeufrazioconsultoria@gmail.com', 'seu@email.com'];
+
+    // TRADUTOR DE ERROS DO FIREBASE
+    function traduzirErroAuth(codigo) {
+        switch (codigo) {
+            case 'auth/email-already-in-use': return 'Este e-mail já está cadastrado. Vá na aba Entrar.';
+            case 'auth/invalid-email': return 'Formato de e-mail inválido.';
+            case 'auth/weak-password': return 'A senha é muito fraca (mínimo de 6 caracteres).';
+            case 'auth/user-not-found': return 'Nenhuma conta encontrada com este e-mail.';
+            case 'auth/wrong-password': return 'Senha incorreta.';
+            case 'auth/invalid-credential': return 'E-mail ou senha incorretos.';
+            case 'auth/too-many-requests': return 'Muitas tentativas falhas. Tente novamente mais tarde.';
+            default: return 'Ocorreu um erro inesperado. Tente novamente.';
+        }
+    }
+
+    async function carregarListaUsuarios() {
+        const tbody = document.querySelector('#tabela-usuarios tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Carregando usuários...</td></tr>';
+        
+        try {
+            const snapshot = await db.collection('users').get();
+            tbody.innerHTML = '';
+            
+            if(snapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum usuário encontrado.</td></tr>';
+                return;
+            }
+
+            const usuarios = [];
+            snapshot.forEach(doc => usuarios.push(doc.data()));
+            
+            // Ordenar do mais novo para o mais antigo
+            usuarios.sort((a, b) => {
+                const timeA = a.createdAt ? a.createdAt.toDate().getTime() : 0;
+                const timeB = b.createdAt ? b.createdAt.toDate().getTime() : 0;
+                return timeB - timeA;
+            });
+
+            usuarios.forEach(data => {
+                const tr = document.createElement('tr');
+                const dataCriacao = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString('pt-BR') : 'N/A';
+                const qtdInsumos = data.insumos ? data.insumos.length : 0;
+                const qtdDrinques = data.drinques ? data.drinques.length : 0;
+                
+                tr.innerHTML = `
+                    <td><strong>${data.nome || 'Sem nome'}</strong></td>
+                    <td>${data.email || 'Sem e-mail'}</td>
+                    <td>${data.telefone || 'N/A'}</td>
+                    <td>${dataCriacao}</td>
+                    <td><span style="background: var(--hover-bg); padding: 4px 8px; border-radius: 4px; font-weight: bold; color: var(--accent);">${qtdInsumos}</span></td>
+                    <td><span style="background: var(--hover-bg); padding: 4px 8px; border-radius: 4px; font-weight: bold; color: var(--success);">${qtdDrinques}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (e) {
+            console.error("Erro ao carregar painel admin:", e);
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--danger);">Erro ao carregar usuários. Você tem permissão de leitura total no banco?</td></tr>`;
+        }
+    }
+
     const svgEye = '<svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
     const svgEyeOff = '<svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
 
@@ -1115,6 +1209,16 @@
             }
             currentUser = user;
             authScreen.style.display = 'none';
+            
+            // Libera aba de Admin se for o dono
+            const btnAdmin = document.getElementById('btn-tab-admin');
+            if (ADMIN_EMAILS.includes(user.email)) {
+                btnAdmin.style.display = 'block';
+                carregarListaUsuarios();
+            } else {
+                btnAdmin.style.display = 'none';
+            }
+            
             carregarDadosNuvem(); // Carrega do Firestore
         } else {
             currentUser = null;
@@ -1125,20 +1229,6 @@
             renderDrinquesSalvos();
         }
     });
-
-    // TRADUTOR DE ERROS DO FIREBASE
-    function traduzirErroAuth(codigo) {
-        switch (codigo) {
-            case 'auth/email-already-in-use': return 'Este e-mail já está cadastrado. Vá na aba Entrar.';
-            case 'auth/invalid-email': return 'Formato de e-mail inválido.';
-            case 'auth/weak-password': return 'A senha é muito fraca (mínimo de 6 caracteres).';
-            case 'auth/user-not-found': return 'Nenhuma conta encontrada com este e-mail.';
-            case 'auth/wrong-password': return 'Senha incorreta.';
-            case 'auth/invalid-credential': return 'E-mail ou senha incorretos.';
-            case 'auth/too-many-requests': return 'Muitas tentativas falhas. Tente novamente mais tarde.';
-            default: return 'Ocorreu um erro inesperado. Tente novamente.';
-        }
-    }
 
     document.getElementById('btn-do-login').addEventListener('click', async () => {
         const email = document.getElementById('login-email').value;

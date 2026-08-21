@@ -755,75 +755,22 @@
 
 <div class="container">
 
-    <div class="tabs-nav">
-        <button class="tab-btn active" onclick="openTab('tab-cadastrar-insumo', this)"><span>🧪</span> Novo Insumo</button>
-        <button class="tab-btn" onclick="openTab('tab-insumos-cadastrados', this)"><span>📋</span> Insumos</button>
+    <div class="tabs-nav" style="grid-template-columns: 1fr 1fr;">
+        <button class="tab-btn active" onclick="openTab('tab-insumos-cadastrados', this)"><span>📋</span> Insumos</button>
         <button class="tab-btn" onclick="openTab('tab-drinques', this)"><span>🍹</span> Drinques</button>
     </div>
 
-    <!-- ABA 1: CADASTRAR INSUMO -->
-    <div id="tab-cadastrar-insumo" class="tab-content active">
-        <div class="card card-flex">
-            <div class="card-header">
-                <h2 id="insumo-form-title" style="border:none; padding-bottom:0; margin-bottom:0;">Cadastrar Novo Insumo</h2>
-            </div>
-            <form id="form-insumo" class="card-form-flex">
-                <div class="card-body">
-                    <input type="hidden" id="insumo-id">
-                    <div class="form-row">
-                        <div class="form-group" style="grid-column: span 2;">
-                            <label for="insumo-nome">Nome do Insumo</label>
-                            <input type="text" id="insumo-nome" placeholder="Ex: Gin, Xarope de Açúcar, Limão" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="insumo-unidade">Unidade Padronizada</label>
-                            <select id="insumo-unidade">
-                                <option value="ml">ml</option>
-                                <option value="g">g</option>
-                                <option value="Kg">Kg</option>
-                                <option value="un">unidade</option>
-                                <option value="Dash">Dash</option>
-                                <option value="folhas">folhas</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- SEÇÃO DINÂMICA DE FORNECEDORES -->
-                    <div class="supplier-box">
-                        <label style="font-weight: bold; color: var(--text-main); margin-bottom: 12px; display: block;">
-                            Fornecedores e Preços
-                        </label>
-                        <div style="display: flex; gap: 10px; margin-bottom: 6px; padding-right: 36px;">
-                            <label style="flex:2; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Fornecedor</label>
-                            <label style="flex:1; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Qtd Emb.</label>
-                            <label style="flex:1; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Preço (R$)</label>
-                            <label style="flex:1.1; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Promo (R$)</label>
-                            <label style="flex:1.5; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Data Alt. Valor</label>
-                        </div>
-                        <div id="container-fornecedores">
-                            <!-- Linhas de fornecedores entram via JS -->
-                        </div>
-                        <button type="button" class="btn-secondary" id="btn-add-fornecedor" style="margin-top: 5px;">+ Adicionar Fornecedor</button>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button type="submit" id="btn-salvar-insumo">Salvar Insumo</button>
-                    <button type="button" id="btn-cancelar-edicao" style="display:none;" class="btn-cancelar">Cancelar Edição</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ABA 2: INSUMOS CADASTRADOS -->
-    <div id="tab-insumos-cadastrados" class="tab-content">
+    <!-- ABA 1: INSUMOS CADASTRADOS -->
+    <div id="tab-insumos-cadastrados" class="tab-content active">
         <div class="card">
             <div class="card-header-actions">
                 <h2>Insumos Cadastrados</h2>
                 <div class="actions-group">
-                    <button type="button" class="btn-secondary" onclick="exportarInsumosCSV()">📊 Exportar Planilha (Excel)</button>
+                    <button type="button" class="btn-secondary" onclick="exportarInsumosCSV()">📊 Exportar Planilha</button>
                     <button type="button" class="btn-secondary" id="btn-exportar">📥 Exportar Backup</button>
                     <button type="button" class="btn-success" onclick="document.getElementById('file-importar').click()">📤 Importar Backup</button>
                     <input type="file" id="file-importar" accept=".json" style="display: none;">
+                    <button type="button" class="btn-success" onclick="abrirModalCriarInsumo()" style="background-color: var(--success); color: #fff; border-color: var(--success);">🧪 Novo Insumo</button>
                 </div>
             </div>
             
@@ -928,22 +875,22 @@
     </div>
 </div>
 
-<!-- MODAL DE EDIÇÃO DE INSUMO -->
-<div class="modal-overlay" id="modal-editar-insumo">
+<!-- JANELA MODAL DE CRIAÇÃO / EDIÇÃO DE INSUMO -->
+<div class="modal-overlay" id="modal-insumo">
     <div class="modal-content" style="max-width: 750px;">
         <div class="modal-header">
-            <h3 class="modal-title">✏️ Editar Insumo</h3>
+            <h3 class="modal-title" id="modal-insumo-title">🧪 Novo Insumo</h3>
         </div>
         <div class="modal-body">
-            <input type="hidden" id="edit-insumo-id">
+            <input type="hidden" id="modal-insumo-id">
             <div class="form-row">
                 <div class="form-group" style="grid-column: span 2;">
-                    <label for="edit-insumo-nome">Nome do Insumo</label>
-                    <input type="text" id="edit-insumo-nome" placeholder="Ex: Gin, Xarope de Açúcar, Limão" required>
+                    <label for="modal-insumo-nome">Nome do Insumo</label>
+                    <input type="text" id="modal-insumo-nome" placeholder="Ex: Gin, Xarope de Açúcar, Limão" required>
                 </div>
                 <div class="form-group">
-                    <label for="edit-insumo-unidade">Unidade Padronizada</label>
-                    <select id="edit-insumo-unidade">
+                    <label for="modal-insumo-unidade">Unidade Padronizada</label>
+                    <select id="modal-insumo-unidade">
                         <option value="ml">ml</option>
                         <option value="g">g</option>
                         <option value="Kg">Kg</option>
@@ -964,13 +911,13 @@
                     <label style="flex:1.1; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Promo (R$)</label>
                     <label style="flex:1.5; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Data Alt. Valor</label>
                 </div>
-                <div id="edit-container-fornecedores"></div>
-                <button type="button" class="btn-secondary" id="edit-btn-add-fornecedor" style="margin-top: 5px;">+ Adicionar Fornecedor</button>
+                <div id="modal-container-fornecedores"></div>
+                <button type="button" class="btn-secondary" id="modal-btn-add-fornecedor" style="margin-top: 5px;">+ Adicionar Fornecedor</button>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn-cancelar" onclick="fecharModalEditarInsumo()">Cancelar</button>
-            <button class="btn-salvar" id="btn-salvar-edicao-insumo">💾 Salvar Alterações</button>
+            <button class="btn-cancelar" onclick="fecharModalInsumo()">Cancelar</button>
+            <button class="btn-salvar" id="btn-salvar-insumo-modal">💾 Salvar Insumo</button>
         </div>
     </div>
 </div>
@@ -1241,13 +1188,11 @@
     }
 
     // ELEMENTOS DOM
-    const formInsumo = document.getElementById('form-insumo');
-    const insumoId = document.getElementById('insumo-id');
-    const insumoNome = document.getElementById('insumo-nome');
-    const insumoUnidade = document.getElementById('insumo-unidade');
-    const containerFornecedores = document.getElementById('container-fornecedores');
-    const btnAddFornecedor = document.getElementById('btn-add-fornecedor');
-    const btnCancelarEdicao = document.getElementById('btn-cancelar-edicao');
+    const modalInsumoId = document.getElementById('modal-insumo-id');
+    const modalInsumoNome = document.getElementById('modal-insumo-nome');
+    const modalInsumoUnidade = document.getElementById('modal-insumo-unidade');
+    const modalContainerFornecedores = document.getElementById('modal-container-fornecedores');
+    const modalBtnAddFornecedor = document.getElementById('modal-btn-add-fornecedor');
     
     const drinqueId = document.getElementById('drinque-id');
     const drinqueNome = document.getElementById('drinque-nome');
@@ -1265,116 +1210,30 @@
     const fileImportar = document.getElementById('file-importar');
 
     function init() {
-        resetFormInsumo();
         carregarDadosNuvem();
     }
 
-    // LOGICA DOS CAMPOS DINÂMICOS DE FORNECEDORES
-    btnAddFornecedor.addEventListener('click', () => adicionarLinhaFornecedor());
-
-    function adicionarLinhaFornecedor(nome = '', qtd = '', preco = '', data = '', precoPromo = '') {
-        const div = document.createElement('div');
-        div.className = 'supplier-row';
-        const dataFmt = formatarDataParaInput(data);
-        const dataPadrao = dataFmt || new Date().toISOString().split('T')[0];
-        div.innerHTML = `
-            <div class="f-group" style="flex:2; min-width: 0;">
-                <label class="mobile-only-label">Fornecedor</label>
-                <input type="text" placeholder="Fornecedor (Ex: Mercado A)" class="f-nome" value="${nome}" required style="width:100%;">
-            </div>
-            <div class="f-group" style="flex:1; min-width: 0;">
-                <label class="mobile-only-label">Qtd Emb.</label>
-                <input type="number" step="0.01" placeholder="Qtd Emb." class="f-qtd" value="${qtd}" required style="width:100%;">
-            </div>
-            <div class="f-group" style="flex:1; min-width: 0;">
-                <label class="mobile-only-label">Preço (R$)</label>
-                <input type="number" step="0.01" placeholder="Preço (R$)" class="f-preco" value="${preco}" required style="width:100%;">
-            </div>
-            <div class="f-group" style="flex:1.1; min-width: 0;">
-                <label class="mobile-only-label">Promo (R$)</label>
-                <div style="display: flex; align-items: center; gap: 2px; width: 100%;">
-                    <span style="color: #fbbf24; font-weight: 900; font-size: 1.1rem; align-self: center; margin: 0 2px;">$</span>
-                    <input type="number" step="0.01" placeholder="Promo" class="f-preco-promo" value="${precoPromo}" style="flex:1; min-width: 0; width: 100%;">
-                </div>
-            </div>
-            <div class="f-group" style="flex:1.5; min-width: 0;">
-                <label class="mobile-only-label">Data Alt. Valor</label>
-                <input type="date" class="f-data" value="${dataPadrao}" required style="width:100%;">
-            </div>
-            <button type="button" class="btn-danger remover-fornecedor-btn" onclick="removerLinhaFornecedor(this)" style="flex-shrink: 0; padding: 6px 10px;">X</button>
-        `;
-        containerFornecedores.appendChild(div);
+    function abrirModalCriarInsumo() {
+        document.getElementById('modal-insumo-title').innerText = '🧪 Novo Insumo';
+        modalInsumoId.value = '';
+        modalInsumoNome.value = '';
+        modalInsumoUnidade.value = 'ml';
+        modalContainerFornecedores.innerHTML = '';
+        adicionarLinhaFornecedorModal();
+        const modal = document.getElementById('modal-insumo');
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.classList.add('active');
     }
 
-    function removerLinhaFornecedor(btn) {
-        if (containerFornecedores.children.length > 1) {
-            confirmar('Tem certeza que deseja remover este fornecedor?', () => {
-                btn.parentElement.remove();
-            });
-        } else {
-            mostrarNotificacao("É necessário manter pelo menos um fornecedor cadastrado!", "danger");
-        }
+    function fecharModalInsumo() {
+        const modal = document.getElementById('modal-insumo');
+        modal.classList.remove('active');
+        modal.style.visibility = '';
+        modal.style.opacity = '';
     }
 
-    // SALVAR INSUMO
-    formInsumo.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = insumoId.value;
-        
-        const linhasFornecedores = containerFornecedores.querySelectorAll('.supplier-row');
-        const listaFornecedores = [];
-
-        linhasFornecedores.forEach(row => {
-            const fNome = row.querySelector('.f-nome').value.trim();
-            const fQtd = parseFloat(row.querySelector('.f-qtd').value);
-            const fPreco = parseFloat(row.querySelector('.f-preco').value);
-            const fPrecoPromoVal = row.querySelector('.f-preco-promo').value;
-            const fPrecoPromo = fPrecoPromoVal ? parseFloat(fPrecoPromoVal) : null;
-            const fData = row.querySelector('.f-data').value;
-
-            if (fNome && !isNaN(fQtd) && !isNaN(fPreco)) {
-                listaFornecedores.push({ 
-                    nome: fNome, 
-                    qtd: fQtd, 
-                    preco: fPreco, 
-                    precoPromo: fPrecoPromo, 
-                    data: fData 
-                });
-            }
-        });
-
-        if (listaFornecedores.length === 0) {
-            mostrarNotificacao('Adicione pelo menos um fornecedor válido!', 'danger');
-            return;
-        }
-
-        const dados = {
-            id: id ? Number(id) : Date.now(),
-            nome: insumoNome.value,
-            unidade: insumoUnidade.value,
-            fornecedores: listaFornecedores
-        };
-
-        if (id) {
-            insumos = insumos.map(i => i.id === dados.id ? dados : i);
-        } else {
-            insumos.push(dados);
-        }
-
-        salvarStorage();
-        resetFormInsumo();
-        renderInsumos();
-        atualizarSelectInsumos();
-        recalcularReceita();
-        renderDrinquesSalvos();
-        mostrarNotificacao('Insumo salvo com sucesso!');
-    });
-
-    // MODAL DE EDIÇÃO DE INSUMO
-    const editContainerFornecedores = document.getElementById('edit-container-fornecedores');
-    const editBtnAddFornecedor = document.getElementById('edit-btn-add-fornecedor');
-
-    editBtnAddFornecedor.addEventListener('click', () => adicionarLinhaFornecedorModal());
+    modalBtnAddFornecedor.addEventListener('click', () => adicionarLinhaFornecedorModal());
 
     function adicionarLinhaFornecedorModal(nome = '', qtd = '', preco = '', data = '', precoPromo = '') {
         const div = document.createElement('div');
@@ -1384,34 +1243,34 @@
         div.innerHTML = `
             <div class="f-group" style="flex:2; min-width: 0;">
                 <label class="mobile-only-label">Fornecedor</label>
-                <input type="text" placeholder="Fornecedor (Ex: Mercado A)" class="f-nome" value="${nome}" required style="width:100%;">
+                <input type="text" placeholder="Fornecedor" class="f-nome" value="${nome}" required style="width:100%;">
             </div>
             <div class="f-group" style="flex:1; min-width: 0;">
                 <label class="mobile-only-label">Qtd Emb.</label>
-                <input type="number" step="0.01" placeholder="Qtd Emb." class="f-qtd" value="${qtd}" required style="width:100%;">
+                <input type="number" step="0.01" placeholder="Qtd" class="f-qtd" value="${qtd}" required style="width:100%;">
             </div>
             <div class="f-group" style="flex:1; min-width: 0;">
                 <label class="mobile-only-label">Preço (R$)</label>
-                <input type="number" step="0.01" placeholder="Preço (R$)" class="f-preco" value="${preco}" required style="width:100%;">
+                <input type="number" step="0.01" placeholder="R$" class="f-preco" value="${preco}" required style="width:100%;">
             </div>
             <div class="f-group" style="flex:1.1; min-width: 0;">
                 <label class="mobile-only-label">Promo (R$)</label>
                 <div style="display: flex; align-items: center; gap: 2px; width: 100%;">
                     <span style="color: #fbbf24; font-weight: 900; font-size: 1.1rem; align-self: center; margin: 0 2px;">$</span>
-                    <input type="number" step="0.01" placeholder="Promo" class="f-preco-promo" value="${precoPromo}" style="flex:1; min-width: 0; width: 100%;">
+                    <input type="number" step="0.01" placeholder="Promo" class="f-preco-promo" value="${precoPromo || ''}" style="flex:1; min-width: 0; width: 100%;">
                 </div>
             </div>
             <div class="f-group" style="flex:1.5; min-width: 0;">
                 <label class="mobile-only-label">Data Alt. Valor</label>
                 <input type="date" class="f-data" value="${dataPadrao}" required style="width:100%;">
             </div>
-            <button type="button" class="btn-danger remover-fornecedor-btn" onclick="removerLinhaFornecedorModal(this)" style="flex-shrink: 0; padding: 6px 10px;">X</button>
+            <button type="button" class="btn-danger" style="flex:0 0 auto; padding: 10px;" onclick="removerLinhaFornecedorModal(this)">X</button>
         `;
-        editContainerFornecedores.appendChild(div);
+        modalContainerFornecedores.appendChild(div);
     }
 
     function removerLinhaFornecedorModal(btn) {
-        if (editContainerFornecedores.children.length > 1) {
+        if (modalContainerFornecedores.children.length > 1) {
             confirmar('Tem certeza que deseja remover este fornecedor?', () => {
                 btn.parentElement.remove();
             });
@@ -1424,11 +1283,12 @@
         const item = insumos.find(i => i.id === id);
         if (!item) return;
 
-        document.getElementById('edit-insumo-id').value = item.id;
-        document.getElementById('edit-insumo-nome').value = item.nome;
-        document.getElementById('edit-insumo-unidade').value = item.unidade;
+        document.getElementById('modal-insumo-title').innerText = '✏️ Editar Insumo';
+        modalInsumoId.value = item.id;
+        modalInsumoNome.value = item.nome;
+        modalInsumoUnidade.value = item.unidade;
 
-        editContainerFornecedores.innerHTML = '';
+        modalContainerFornecedores.innerHTML = '';
         if (item.fornecedores && item.fornecedores.length > 0) {
             item.fornecedores.forEach(f => adicionarLinhaFornecedorModal(f.nome, f.qtd, f.preco, f.data, f.precoPromo));
         } else if (item.preco) {
@@ -1437,27 +1297,21 @@
             adicionarLinhaFornecedorModal();
         }
 
-        const modal = document.getElementById('modal-editar-insumo');
+        const modal = document.getElementById('modal-insumo');
         modal.style.visibility = 'visible';
         modal.style.opacity = '1';
         modal.classList.add('active');
     }
 
-    function fecharModalEditarInsumo() {
-        const modal = document.getElementById('modal-editar-insumo');
-        modal.classList.remove('active');
-        modal.style.visibility = '';
-        modal.style.opacity = '';
-    }
-
-    document.getElementById('btn-salvar-edicao-insumo').addEventListener('click', () => {
-        const id = Number(document.getElementById('edit-insumo-id').value);
-        const nome = document.getElementById('edit-insumo-nome').value.trim();
-        const unidade = document.getElementById('edit-insumo-unidade').value;
+    document.getElementById('btn-salvar-insumo-modal').addEventListener('click', () => {
+        const idStr = modalInsumoId.value;
+        const id = idStr ? Number(idStr) : Date.now();
+        const nome = modalInsumoNome.value.trim();
+        const unidade = modalInsumoUnidade.value;
 
         if (!nome) { mostrarNotificacao('Informe o nome do insumo.', 'danger'); return; }
 
-        const linhas = editContainerFornecedores.querySelectorAll('.supplier-row');
+        const linhas = modalContainerFornecedores.querySelectorAll('.supplier-row');
         const fornecedores = [];
         let valido = true;
         linhas.forEach(row => {
@@ -1469,32 +1323,33 @@
             if (!n || isNaN(q) || isNaN(p)) { valido = false; return; }
             fornecedores.push({ nome: n, qtd: q, preco: p, precoPromo: pp, data: d });
         });
+
+        if (fornecedores.length === 0) {
+            mostrarNotificacao('Adicione pelo menos um fornecedor!', 'danger');
+            return;
+        }
         if (!valido) { mostrarNotificacao('Preencha todos os campos dos fornecedores.', 'danger'); return; }
 
-        const idx = insumos.findIndex(i => i.id === id);
-        if (idx !== -1) {
-            insumos[idx] = { ...insumos[idx], nome, unidade, fornecedores };
-            salvarStorage();
-            renderInsumos();
-            atualizarSelectInsumos();
-            recalcularReceita();
-            renderDrinquesSalvos();
-            fecharModalEditarInsumo();
-            mostrarNotificacao('Insumo atualizado com sucesso!');
+        const dados = { id, nome, unidade, fornecedores };
+
+        if (idStr) {
+            const idx = insumos.findIndex(i => i.id === id);
+            if (idx !== -1) {
+                insumos[idx] = dados;
+            }
         } else {
-            mostrarNotificacao('Erro ao encontrar o insumo. Tente novamente.', 'danger');
+            insumos.push(dados);
         }
+
+        salvarStorage();
+        renderInsumos();
+        atualizarSelectInsumos();
+        recalcularReceita();
+        renderDrinquesSalvos();
+        fecharModalInsumo();
+        mostrarNotificacao('Insumo salvo com sucesso!');
     });
 
-    btnCancelarEdicao.addEventListener('click', resetFormInsumo);
-
-    function resetFormInsumo() {
-        insumoId.value = '';
-        formInsumo.reset();
-        containerFornecedores.innerHTML = '';
-        adicionarLinhaFornecedor();
-        btnCancelarEdicao.style.display = "none";
-    }
 
     function excluirInsumo(id) {
         confirmar('Excluir este insumo? Ele será removido de todas as receitas.', () => {

@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de CMV de Drinques</title>
+    <title>Calculadora CMV - Bar & Restaurante</title>
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --bg-dark: #0b0f19;       /* Fundo principal azul-escuro profundo */
@@ -753,11 +757,30 @@
 </head>
 <body>
 
+<!-- TELA DE LOGIN / AUTENTICAÇÃO -->
+<div id="auth-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+    <div class="card" style="width: 100%; max-width: 400px; padding: 40px 30px;">
+        <div style="text-align: center; font-size: 3rem; margin-bottom: 10px;">🍹</div>
+        <h2 style="text-align: center; margin-bottom: 30px; color: var(--text-main);">Calculadora CMV</h2>
+        <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="auth-email" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="auth-password" placeholder="Sua senha">
+        </div>
+        <button class="btn-salvar" id="btn-login" style="width: 100%; margin-top: 10px; margin-bottom: 15px; padding: 12px; font-size: 1rem;">Entrar</button>
+        <button class="btn-secondary" id="btn-signup" style="width: 100%; padding: 12px; font-size: 1rem;">Criar Nova Conta</button>
+    </div>
+</div>
+
 <div class="container">
 
-    <div class="tabs-nav" style="grid-template-columns: 1fr 1fr;">
+    <div class="tabs-nav" style="grid-template-columns: 1fr 1fr auto;">
         <button class="tab-btn active" onclick="openTab('tab-insumos-cadastrados', this)"><span>📋</span> Insumos</button>
         <button class="tab-btn" onclick="openTab('tab-drinques', this)"><span>🍹</span> Drinques</button>
+        <button class="tab-btn" id="btn-logout" style="color: var(--danger); font-size: 0.85rem; padding: 10px; border-radius: 8px;"><span>🚪</span> Sair</button>
     </div>
 
     <!-- ABA 1: INSUMOS CADASTRADOS -->
@@ -959,11 +982,67 @@
 "></div>
 
 <script>
-    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbyqU_5CUxz9yRXO3VyJphPZadJ7MOR158tZbxDkLWARhm2bqmB4F6l8-Sp61hnc0nI/exec";
+    const firebaseConfig = {
+        apiKey: "AIzaSyB6LNd8p1tuZ4Ed1UXDFK1y6fAeuArI0Fo",
+        authDomain: "calculador-cmv.firebaseapp.com",
+        databaseURL: "https://calculador-cmv-default-rtdb.firebaseio.com",
+        projectId: "calculador-cmv",
+        storageBucket: "calculador-cmv.firebasestorage.app",
+        messagingSenderId: "417496829167",
+        appId: "1:417496829167:web:5257d462429f77fcb89f1a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser = null;
 
     let insumos = [];
     let drinques = [];
     let receitaAtual = [];
+
+    // --- AUTENTICAÇÃO ---
+    auth.onAuthStateChanged(user => {
+        const authScreen = document.getElementById('auth-screen');
+        if (user) {
+            currentUser = user;
+            authScreen.style.display = 'none';
+            carregarDadosNuvem(); // Agora carrega do Firestore
+        } else {
+            currentUser = null;
+            authScreen.style.display = 'flex';
+            insumos = [];
+            drinques = [];
+            renderInsumos();
+            renderDrinquesSalvos();
+        }
+    });
+
+    document.getElementById('btn-login').addEventListener('click', async () => {
+        const email = document.getElementById('auth-email').value;
+        const pass = document.getElementById('auth-password').value;
+        try {
+            await auth.signInWithEmailAndPassword(email, pass);
+            mostrarNotificacao('Login efetuado com sucesso!');
+        } catch (e) {
+            mostrarNotificacao('Erro: ' + e.message, 'danger');
+        }
+    });
+
+    document.getElementById('btn-signup').addEventListener('click', async () => {
+        const email = document.getElementById('auth-email').value;
+        const pass = document.getElementById('auth-password').value;
+        try {
+            await auth.createUserWithEmailAndPassword(email, pass);
+            mostrarNotificacao('Conta criada com sucesso!');
+        } catch (e) {
+            mostrarNotificacao('Erro ao criar conta: ' + e.message, 'danger');
+        }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+        auth.signOut();
+    });
 
     // MODAL DE CONFIRMAÇÃO PERSONALIZADO
     function confirmar(mensagem, callbackSim) {
@@ -984,44 +1063,42 @@
         btnNao.onclick = () => fechar();
     }
 
-    function carregarLocalStorage() {
-        insumos = JSON.parse(localStorage.getItem('insumos_db')) || [];
-        drinques = JSON.parse(localStorage.getItem('drinques_db')) || [];
-    }
-
     async function carregarDadosNuvem() {
-        carregarLocalStorage();
-
-        if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("SUA_URL_DO_GOOGLE")) {
-            renderInsumos();
-            atualizarSelectInsumos();
-            renderDrinquesSalvos();
-            calcularTotais();
-            return;
-        }
+        if (!currentUser) return;
 
         try {
-            const response = await fetch(GOOGLE_SHEET_URL);
-            const data = await response.json();
-            if (data.insumos) insumos = data.insumos;
-            if (data.drinques) drinques = data.drinques;
+            const docRef = db.collection('users').doc(currentUser.uid);
+            const docSnap = await docRef.get();
 
-            localStorage.setItem('insumos_db', JSON.stringify(insumos));
-            localStorage.setItem('drinques_db', JSON.stringify(drinques));
-
-            renderInsumos();
-            atualizarSelectInsumos();
-            renderDrinquesSalvos();
-            calcularTotais();
-            mostrarNotificacao('Dados sincronizados com a nuvem!');
+            if (docSnap.exists) {
+                const data = docSnap.data();
+                insumos = data.insumos || [];
+                drinques = data.drinques || [];
+                mostrarNotificacao('Dados carregados da nuvem!');
+            } else {
+                // Primeira vez do usuário? Se ele tiver algo no localStorage, fazemos a migração.
+                const localInsumos = JSON.parse(localStorage.getItem('insumos_db')) || [];
+                const localDrinques = JSON.parse(localStorage.getItem('drinques_db')) || [];
+                
+                if (localInsumos.length > 0 || localDrinques.length > 0) {
+                    insumos = localInsumos;
+                    drinques = localDrinques;
+                    await salvarStorage(); // Salva na nuvem
+                    mostrarNotificacao('Dados locais salvos na sua nova conta na nuvem!');
+                } else {
+                    insumos = [];
+                    drinques = [];
+                }
+            }
         } catch (err) {
-            console.error('Erro ao sincronizar com a nuvem:', err);
-            mostrarNotificacao('Erro de conexão. Usando dados locais offline.', 'danger');
-            renderInsumos();
-            atualizarSelectInsumos();
-            renderDrinquesSalvos();
-            calcularTotais();
+            console.error('Erro ao carregar do Firestore:', err);
+            mostrarNotificacao('Erro de conexão. Verifique sua internet.', 'danger');
         }
+
+        renderInsumos();
+        atualizarSelectInsumos();
+        renderDrinquesSalvos();
+        calcularTotais();
     }
 
     // EXIBE UMA NOTIFICAÇÃO FLUTUANTE (TOAST)
@@ -1689,25 +1766,21 @@
     }
 
     async function salvarStorage() {
+        if (!currentUser) return;
+        
+        // Backup local de segurança
         localStorage.setItem('insumos_db', JSON.stringify(insumos));
         localStorage.setItem('drinques_db', JSON.stringify(drinques));
 
-        if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("SUA_URL_DO_GOOGLE")) {
-            return;
-        }
-
         try {
-            await fetch(GOOGLE_SHEET_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8'
-                },
-                body: JSON.stringify({ insumos: insumos, drinques: drinques })
+            await db.collection('users').doc(currentUser.uid).set({
+                insumos: insumos,
+                drinques: drinques,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            mostrarNotificacao('Alterações salvas na nuvem!');
         } catch (err) {
-            console.error('Erro ao salvar na nuvem:', err);
-            mostrarNotificacao('Salvo localmente (erro de conexão com a nuvem).', 'danger');
+            console.error('Erro ao salvar no Firestore:', err);
+            mostrarNotificacao('Salvo apenas localmente (erro de conexão).', 'danger');
         }
     }
 

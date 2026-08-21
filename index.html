@@ -770,7 +770,10 @@
                 <input type="email" id="login-email" placeholder="seu@email.com">
             </div>
             <div class="form-group">
-                <label>Senha</label>
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <label>Senha</label>
+                    <a href="#" onclick="recuperarSenha()" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">Esqueceu a senha?</a>
+                </div>
                 <div style="display: flex; gap: 5px;">
                     <input type="password" id="login-password" placeholder="Sua senha" style="flex: 1;">
                     <button type="button" class="btn-secondary" onclick="togglePasswordVisibility('login-password', this)" style="padding: 0 15px; color: var(--text-muted);">
@@ -784,6 +787,7 @@
 
         <!-- FORMULÁRIO DE CADASTRO -->
         <div id="form-signup-view" style="display: none;">
+            <p style="text-align: center; font-size: 0.85rem; color: var(--accent); margin-bottom: 15px;">Dica: Verifique o Spam após o cadastro.</p>
             <div class="form-group">
                 <label>Nome Completo</label>
                 <input type="text" id="signup-name" placeholder="Seu nome">
@@ -800,7 +804,7 @@
                 <label>Criar Senha</label>
                 <div style="display: flex; gap: 5px;">
                     <input type="password" id="signup-password" placeholder="Nova senha" style="flex: 1;">
-                    <button type="button" class="btn-secondary" onclick="togglePasswordVisibility('signup-password', this)" style="padding: 0 15px; color: var(--text-muted);">
+                    <button type="button" class="btn-secondary toggle-signup-pwd" onclick="toggleSignupPasswords()" style="padding: 0 15px; color: var(--text-muted);">
                         <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                     </button>
                 </div>
@@ -809,7 +813,7 @@
                 <label>Confirmar Senha</label>
                 <div style="display: flex; gap: 5px;">
                     <input type="password" id="signup-confirm-password" placeholder="Repita a senha" style="flex: 1;">
-                    <button type="button" class="btn-secondary" onclick="togglePasswordVisibility('signup-confirm-password', this)" style="padding: 0 15px; color: var(--text-muted);">
+                    <button type="button" class="btn-secondary toggle-signup-pwd" onclick="toggleSignupPasswords()" style="padding: 0 15px; color: var(--text-muted);">
                         <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                     </button>
                 </div>
@@ -1068,6 +1072,36 @@
         } else {
             input.type = "password";
             btn.innerHTML = svgEyeOff;
+        }
+    }
+
+    function toggleSignupPasswords() {
+        const inp1 = document.getElementById('signup-password');
+        const inp2 = document.getElementById('signup-confirm-password');
+        const btns = document.querySelectorAll('.toggle-signup-pwd');
+        
+        if (inp1.type === "password") {
+            inp1.type = "text";
+            inp2.type = "text";
+            btns.forEach(b => b.innerHTML = svgEye);
+        } else {
+            inp1.type = "password";
+            inp2.type = "password";
+            btns.forEach(b => b.innerHTML = svgEyeOff);
+        }
+    }
+
+    async function recuperarSenha() {
+        const email = document.getElementById('login-email').value.trim();
+        if (!email) {
+            mostrarNotificacao('Preencha seu e-mail acima para recuperar a senha!', 'danger');
+            return;
+        }
+        try {
+            await auth.sendPasswordResetEmail(email);
+            mostrarNotificacao('E-mail de redefinição enviado! Verifique o spam.', 'success');
+        } catch (e) {
+            mostrarNotificacao(traduzirErroAuth(e.code), 'danger');
         }
     }
 
